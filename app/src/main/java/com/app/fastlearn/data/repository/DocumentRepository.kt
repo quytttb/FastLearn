@@ -1,4 +1,11 @@
 package com.app.fastlearn.data.repository
 
-class DocumentRepository {
+import com.app.fastlearn.domain.model.Document
+import kotlinx.coroutines.flow.Flow
+
+interface DocumentRepository {
+    fun getAllDocuments(): Flow<List<Document>>
+    suspend fun insertDocument(document: Document): Long
+    suspend fun deleteDocument(document: Document)
+    fun getDocumentById(id: Int): Flow<Document?>
 }
