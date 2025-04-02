@@ -64,12 +64,23 @@ fun FastLearnNavGraph(
         ) { entry ->
             ImagePreviewScreen(
                 imageName = entry.arguments?.getString(DestinationsArgs.IMAGE_NAME)!!,
-                onConfirmNavigate = { /*TODO: xử lý xác nhận ảnh*/ },
+                onConfirmNavigate = { recognizedText ->
+                    navActions.navigateToOCR(recognizedText)
+                },
                 onDiscardNavigate = { navActions.navigateBack() }
             )
         }
-        composable(Destinations.OCR_ROUTE) {
-            OCRScreen()
+
+        composable(
+            route = Destinations.OCR_ROUTE,
+            arguments = listOf(
+                navArgument(DestinationsArgs.RECOGNIZED_TEXT_ID) { type = NavType.StringType }
+            )
+        ) { entry ->
+            OCRScreen(
+                onConfirm = { /* Todo: handle confirm */ },
+                onDiscard = { navActions.navigateBack() }
+            )
         }
 
         composable(Destinations.CACHED_IMAGES_ROUTE) {

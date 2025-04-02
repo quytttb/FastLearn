@@ -10,8 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.app.fastlearn.R
 
 @Composable
 fun DocumentsScreen(
@@ -23,7 +25,7 @@ fun DocumentsScreen(
     val documents by viewModel.documents.collectAsState()
 
         Column {
-            Text("Documents Screen")
+            Text(stringResource(id = R.string.documents_screen_title))
             LazyColumn {
                 items(documents) { document ->
                     Text(

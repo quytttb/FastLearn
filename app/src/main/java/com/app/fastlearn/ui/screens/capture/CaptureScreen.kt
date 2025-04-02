@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,7 +34,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.navigation.NavController
+import com.app.fastlearn.R
 
 @Composable
 fun CaptureScreen(
@@ -46,20 +47,27 @@ fun CaptureScreen(
 
     val hasCamPermission by viewModel.hasCameraPermission.collectAsState()
 
-    val launcher = rememberLauncherForActivityResult(
+    // Yêu cầu quyền camera
+    val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted ->
-            viewModel.checkAndRequestCameraPermission(context, activity, 0)
+            if (granted) {
+                viewModel.checkAndRequestCameraPermission(context, activity, 0)
+            } else {
+                Log.e("Camera", "Permission denied")
+            }
         }
     )
 
+    // Nếu chưa có quyền camera, yêu cầu quyền
     LaunchedEffect(key1 = true) {
         viewModel.checkAndRequestCameraPermission(context, activity, 0)
         if (!hasCamPermission) {
-            launcher.launch(Manifest.permission.CAMERA)
+            permissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
+    // Nếu đã có quyền camera, hiển thị CameraPreview
     if (hasCamPermission) {
         CameraPreview(
             context = context,
@@ -67,14 +75,14 @@ fun CaptureScreen(
             viewModel = viewModel,
             onImageCaptured = onImageCaptured
         )
-    } else {
+    } else {// Nếu không có quyền camera, hiển thị thông báo
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .wrapContentSize(Alignment.Center)
         ) {
             Text(
-                text = "Camera permission denied",
+                text = stringResource(id = R.string.camera_permission_denied),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -91,14 +99,18 @@ fun CameraPreview(
 ) {
     val previewView = remember { PreviewView(context) }
 
-    // Setup camera preview when the composable is first composed
+    // Thiết lập CameraPreview
     LaunchedEffect(previewView) {
         viewModel.setupCameraPreview(
             context = context,
             previewView = previewView,
             lifecycleOwner = lifecycleOwner,
             onSetupComplete = { success ->
-                // Handle camera setup success/failure if needed
+                if (success) {
+                    Log.d("CameraX", "Camera setup complete")
+                } else {
+                    Log.e("CameraX", "Camera setup failed")
+                }
             }
         )
     }
@@ -123,9 +135,12 @@ fun CameraPreview(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp)
         ) {
-            Icon(Icons.Default.CameraAlt, contentDescription = "Take Photo")
+            Icon(
+                Icons.Default.CameraAlt,
+                contentDescription = stringResource(id = R.string.take_photo)
+            )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Take Photo")
+            Text(text = stringResource(id = R.string.take_photo))
         }
     }
 }

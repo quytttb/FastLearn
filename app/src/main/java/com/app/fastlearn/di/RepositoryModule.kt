@@ -1,8 +1,10 @@
 package com.app.fastlearn.di
 
 import com.app.fastlearn.data.repository.*
+import com.app.fastlearn.domain.repository.*
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -28,4 +30,12 @@ abstract class RepositoryModule {
     abstract fun bindProgressRepository(
         progressRepositoryImpl: ProgressRepositoryImpl
     ): ProgressRepository
+
+    companion object {
+        @Provides
+        @Singleton
+        fun provideRecognizedTextRepository(): RecognizedTextRepository {
+            return RecognizedTextRepository()
+        }
+    }
 }

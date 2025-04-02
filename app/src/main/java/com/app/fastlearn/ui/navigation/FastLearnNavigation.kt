@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.app.fastlearn.ui.navigation.DestinationsArgs.IMAGE_NAME
+import com.app.fastlearn.ui.navigation.DestinationsArgs.RECOGNIZED_TEXT_ID
 
 /**
  * Định nghĩa [Screens]
@@ -30,6 +31,7 @@ private object Screens {
 
 object DestinationsArgs {
     const val IMAGE_NAME = "imageName"
+    const val RECOGNIZED_TEXT_ID = "recognizedTextId"
 }
 
 /**
@@ -41,7 +43,7 @@ object Destinations {
     const val FLASHCARDS_ROUTE = Screens.FLASHCARDS
     const val STUDY_ROUTE = Screens.STUDY
     const val IMAGE_PREVIEW_ROUTE = "${Screens.IMAGE_PREVIEW}/{$IMAGE_NAME}"
-    const val OCR_ROUTE = Screens.OCR
+    const val OCR_ROUTE = "${Screens.OCR}/{$RECOGNIZED_TEXT_ID}"
 
     const val CACHED_IMAGES_ROUTE = Screens.CACHED_IMAGES
 }
@@ -100,8 +102,13 @@ class NavigationActions(private val navController: NavHostController) {
         }
     }
 
-    fun navigateToOCR() {
-        navigateWithDefaultOptions(Destinations.OCR_ROUTE)
+    fun navigateToOCR(recognizedTextId: String) {
+        val route = "${Screens.OCR}/$recognizedTextId"
+        navController.navigate(route) {
+            // Không sử dụng popUpTo đến startDestination cho OCR
+            // vì chúng ta muốn quay lại ImagePreview khi nhấn back
+            launchSingleTop = true
+        }
     }
 
     fun navigateBack() {

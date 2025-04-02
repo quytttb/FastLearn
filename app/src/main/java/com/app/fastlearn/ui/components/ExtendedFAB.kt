@@ -20,7 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.app.fastlearn.R
 
 // Nút FAB mở rộng
 @Composable
@@ -56,15 +58,15 @@ fun ExtendedFAB(
                 // Chụp ảnh
                 ExtendedFloatingActionButton(
                     onClick = onCameraClick,
-                    icon = { Icon(Icons.Filled.CameraAlt, contentDescription = "Camera") },
-                    text = { Text("Camera") },
+                    icon = { Icon(Icons.Filled.CameraAlt, contentDescription = stringResource(id = R.string.camera)) },
+                    text = { Text(stringResource(id = R.string.camera)) },
                 )
 
                 // Chọn file từ thư viện
                 ExtendedFloatingActionButton(
                     onClick = onFileClick,
-                    icon = { Icon(Icons.Filled.FileOpen, contentDescription = "File") },
-                    text = { Text("File") },
+                    icon = { Icon(Icons.Filled.FileOpen, contentDescription = stringResource(id = R.string.file)) },
+                    text = { Text(stringResource(id = R.string.file)) },
                 )
             }
         }

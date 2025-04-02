@@ -2,9 +2,7 @@ package com.app.fastlearn.ui.screens.capture
 
 import android.app.Activity
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.util.Log
-import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -22,7 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -36,14 +33,11 @@ class CaptureViewModel @Inject constructor() : ViewModel() {
     private val _hasCameraPermission = MutableStateFlow(false)
     val hasCameraPermission: StateFlow<Boolean> = _hasCameraPermission.asStateFlow()
 
-    private val _capturedImageFile = MutableStateFlow<File?>(null)
-    val capturedImageFile: StateFlow<File?> = _capturedImageFile.asStateFlow()
-
     private val _cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private val _imageCapture: ImageCapture = ImageCapture.Builder().build()
     private val _cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
-    // Check and request camera permission
+    // Kiểm tra và yêu cầu quyền camera
     fun checkAndRequestCameraPermission(context: Context, activity: Activity, requestCode: Int) {
         val hasPermission = Permission.hasCameraPermission(context)
         _hasCameraPermission.value = hasPermission
@@ -52,7 +46,7 @@ class CaptureViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    // Set up camera preview
+    // Thiết lập màn hình camera
     fun setupCameraPreview(
         context: Context,
         previewView: PreviewView,
@@ -87,7 +81,7 @@ class CaptureViewModel @Inject constructor() : ViewModel() {
         }, ContextCompat.getMainExecutor(context))
     }
 
-    // Take photo
+    // Xử lý hình ảnh đã chụp
     fun takePhoto(
         context: Context,
         onImageCaptured: (File) -> Unit,
@@ -113,20 +107,14 @@ class CaptureViewModel @Inject constructor() : ViewModel() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     viewModelScope.launch {
                         Log.d("CameraX", "Photo capture succeeded: ${photoFile.name}")
-                        processImageCaptured(photoFile, onImageCaptured)
+                        onImageCaptured(photoFile)
                     }
                 }
             }
         )
     }
 
-    // Process the captured image
-    private fun processImageCaptured(file: File, onImageCaptured: (File) -> Unit) {
-        _capturedImageFile.value = file
-        onImageCaptured(file)
-    }
-
-    // Clean up resources
+    // Xóa file ảnh
     override fun onCleared() {
         super.onCleared()
         _cameraExecutor.shutdown()

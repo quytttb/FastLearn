@@ -1,6 +1,7 @@
 package com.app.fastlearn.di
 
 import android.content.Context
+import com.app.fastlearn.domain.service.OCRService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,6 +18,10 @@ object AppModule {
     fun provideApplicationContext(@ApplicationContext context: Context): Context {
         return context
     }
-
+    @Singleton
+    @Provides
+    fun provideOCRService(@ApplicationContext context: Context): OCRService {
+        return OCRService(context)
+    }
     // You can add other app-level dependencies here (e.g., SharedPreferences)
 }
