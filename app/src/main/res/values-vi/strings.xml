@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Học Nhanh</string>
+    <string name="extracted_text_label">Văn bản đã trích xuất</string>
+    <string name="discard">Hủy bỏ</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="flashcards_screen_title">Thẻ ghi nhớ</string>
+    <string name="documents_screen_title">Tài liệu</string>
+    <string name="study_screen_title">Học tập</string>
+    <string name="camera">Máy ảnh</string>
+    <string name="file">Tệp</string>
+    <string name="take_photo">Chụp ảnh</string>
+    <string name="camera_permission_denied">Quyền truy cập máy ảnh bị từ chối</string>
+    <string name="captured_image">Ảnh đã chụp</string>
+</resources>
