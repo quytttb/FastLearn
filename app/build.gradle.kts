@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.secretsGradlePlugin)
 }
 
 android {
@@ -18,6 +19,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        //buildConfigField ("String", "API_KEY", "\"${project.properties["apiKey"]}\"")
+
     }
 
     buildTypes {
@@ -38,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -95,6 +100,13 @@ dependencies {
     // ML Kit
     implementation (libs.text.recognition)
     implementation (libs.text.recognition.chinese)
+
+    // Generative AI
+    implementation(libs.generativeai)
+
+    // Accompanist
+    implementation (libs.accompanist.systemuicontroller)
+
 
     // Testing
     testImplementation(libs.junit)

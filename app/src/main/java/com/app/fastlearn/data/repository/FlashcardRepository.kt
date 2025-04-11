@@ -4,8 +4,11 @@ import com.app.fastlearn.domain.model.Flashcard
 import kotlinx.coroutines.flow.Flow
 
 interface FlashcardRepository {
-    fun getFlashcardsForDocument(documentId: Int): Flow<List<Flashcard>>
+    fun getAllFlashcards(): Flow<List<Flashcard>>
+    fun getFlashcardsByDocumentId(documentId: String): Flow<List<Flashcard>>
+    fun getFlashcardCountByDocumentId(documentId: String): Flow<Int>
     suspend fun insertFlashcard(flashcard: Flashcard): Long
     suspend fun deleteFlashcard(flashcard: Flashcard)
-    fun getFlashcardById(id: Int): Flow<Flashcard?>
+    fun getFlashcardById(id: String): Flow<Flashcard?>
+    suspend fun updateFlashcard(flashcard: Flashcard)
 }

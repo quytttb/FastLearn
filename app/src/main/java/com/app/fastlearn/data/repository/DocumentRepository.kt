@@ -7,5 +7,6 @@ interface DocumentRepository {
     fun getAllDocuments(): Flow<List<Document>>
     suspend fun insertDocument(document: Document): Long
     suspend fun deleteDocument(document: Document)
-    fun getDocumentById(id: Int): Flow<Document?>
+    fun getDocumentById(id: String): Flow<Document?>
+    suspend fun updateDocument(document: Document)
 }

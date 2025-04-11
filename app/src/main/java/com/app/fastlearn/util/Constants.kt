@@ -1,4 +1,7 @@
 package com.app.fastlearn.util
 
-class Constants {
+enum class ProgressStatus(val value: String) {
+    CORRECT("CORRECT"),
+    INCORRECT("INCORRECT"),
+    DELETED("DELETED")
 }

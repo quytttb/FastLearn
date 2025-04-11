@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
@@ -31,13 +32,13 @@ fun BottomNavigationBar(
             Navigation.bottomNavItems.forEach { screen ->
                 NavigationBarItem(
                     icon = { Icon(screen.icon, contentDescription = null) },
-                    label = { Text(screen.label) },
+                    label = { Text(text = stringResource(screen.labelResId)) },
                     selected = currentRoute == screen.route,
                     onClick = {
                         when (screen) {
                             Navigation.Documents -> navigationActions.navigateToDocuments()
                             Navigation.Flashcards -> navigationActions.navigateToFlashcards()
-                            Navigation.Study -> navigationActions.navigateToStudy()
+                            Navigation.Study -> navigationActions.navigateToStudyList()
                         }
                     }
                 )

@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".FastLearnApplication"
+        android:name=".Application"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -21,7 +21,7 @@
         android:theme="@style/Theme.FastLearn"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".FastLearnActivity"
             android:exported="true"
             android:theme="@style/Theme.FastLearn">
             <intent-filter>
