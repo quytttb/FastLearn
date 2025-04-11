@@ -53,7 +53,7 @@ class ImagePreviewViewModel @Inject constructor(
 //                        "Recognized text saved with ID: $id"
 //                    )
                     // Xóa file ảnh sau khi đã nhận diện
-                    file.delete()
+//                    file.delete()
                 }
             }
         }

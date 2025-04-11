@@ -24,4 +24,13 @@ interface ProgressDao {
 
     @Query("SELECT * FROM study_progress WHERE flashId = :flashId ORDER BY studyDate DESC LIMIT 1")
     suspend fun getLatestProgressForFlashcard(flashId: String): ProgressEntity?
+
+    @Query("SELECT COUNT(*) FROM study_progress WHERE flashId = :flashId")
+    fun getProgressCountByFlashId(flashId: String): Flow<Int>
+
+    @Query("SELECT * FROM study_progress WHERE flashId IN (SELECT flashId FROM flashcards WHERE docId = :docId) ORDER BY studyDate DESC")
+    fun getProgressByDocId(docId: String): Flow<List<ProgressEntity>>
+
+    @Query("SELECT COUNT(*) FROM study_progress WHERE flashId IN (SELECT flashId FROM flashcards WHERE docId = :docId) AND status = :status")
+    fun getCorrectAnswerCountByDocId(docId: String, status: String): Flow<Int>
 }

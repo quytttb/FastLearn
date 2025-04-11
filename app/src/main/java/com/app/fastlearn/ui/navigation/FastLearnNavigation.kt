@@ -9,20 +9,23 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.app.fastlearn.ui.navigation.DestinationsArgs.IMAGE_NAME
 import com.app.fastlearn.ui.navigation.DestinationsArgs.RECOGNIZED_TEXT_ID
+import com.app.fastlearn.R
 
 /**
  * Định nghĩa [Screens]
  */
 
 private object Screens {
+
     const val DOCUMENTS = "documents"
     const val CAPTURE = "capture"
     const val FLASHCARDS = "flashcards"
     const val STUDY = "study"
+    const val STUDY_LIST = "studyList"
     const val IMAGE_PREVIEW = "imagePreview"
     const val OCR = "ocr"
 
-    const val CACHED_IMAGES = "cachedImages"
+    const val DOCUMENT_DETAIL = "documentDetail"
 }
 
 /**
@@ -32,6 +35,7 @@ private object Screens {
 object DestinationsArgs {
     const val IMAGE_NAME = "imageName"
     const val RECOGNIZED_TEXT_ID = "recognizedTextId"
+    const val DOCUMENT_ID = "documentId"
 }
 
 /**
@@ -41,20 +45,36 @@ object Destinations {
     const val DOCUMENTS_ROUTE = Screens.DOCUMENTS
     const val CAPTURE_ROUTE = Screens.CAPTURE
     const val FLASHCARDS_ROUTE = Screens.FLASHCARDS
-    const val STUDY_ROUTE = Screens.STUDY
+    const val STUDY_LIST_ROUTE = Screens.STUDY_LIST
+    const val STUDY_ROUTE = "${Screens.STUDY}/{${DestinationsArgs.DOCUMENT_ID}}"
     const val IMAGE_PREVIEW_ROUTE = "${Screens.IMAGE_PREVIEW}/{$IMAGE_NAME}"
     const val OCR_ROUTE = "${Screens.OCR}/{$RECOGNIZED_TEXT_ID}"
+    const val DOCUMENT_DETAIL_ROUTE = "${Screens.DOCUMENT_DETAIL}/{$IMAGE_NAME}"
 
-    const val CACHED_IMAGES_ROUTE = Screens.CACHED_IMAGES
 }
 
 /**
  * Định nghĩa các bottom screen [Navigation]
  */
-sealed class Navigation(val route: String, val label: String, val icon: ImageVector) {
-    object Documents : Navigation(Destinations.DOCUMENTS_ROUTE, "Documents", Icons.Filled.Description )
-    object Flashcards : Navigation(Destinations.FLASHCARDS_ROUTE, "Flashcards", Icons.Filled.CreditCard)
-    object Study : Navigation(Destinations.STUDY_ROUTE, "Study", Icons.Filled.School)
+sealed class Navigation(val route: String, val labelResId: Int, val icon: ImageVector) {
+    object Documents : Navigation(
+        Destinations.DOCUMENTS_ROUTE,
+        R.string.documents_screen_title,
+        Icons.Filled.Description
+    )
+
+    object Flashcards : Navigation(
+        Destinations.FLASHCARDS_ROUTE,
+        R.string.flashcards_screen_title,
+        Icons.Filled.CreditCard
+    )
+
+    object Study :
+        Navigation(
+            Destinations.STUDY_LIST_ROUTE,
+            R.string.study_screen_title,
+            Icons.Filled.School
+        )
 
     // Items sẽ được hiển thị trên BottomNavigationBar
     companion object {
@@ -81,6 +101,11 @@ class NavigationActions(private val navController: NavHostController) {
         navigateWithDefaultOptions(Destinations.DOCUMENTS_ROUTE)
     }
 
+fun navigateToDocumentDetail(documentId: String) {
+    val route = "${Destinations.DOCUMENT_DETAIL_ROUTE}/$documentId"
+    navigateWithDefaultOptions(route)
+}
+
     fun navigateToCapture() {
         navigateWithDefaultOptions(Destinations.CAPTURE_ROUTE)
     }
@@ -89,8 +114,15 @@ class NavigationActions(private val navController: NavHostController) {
         navigateWithDefaultOptions(Destinations.FLASHCARDS_ROUTE)
     }
 
-    fun navigateToStudy() {
-        navigateWithDefaultOptions(Destinations.STUDY_ROUTE)
+    fun navigateToStudyList() {
+        navigateWithDefaultOptions(Destinations.STUDY_LIST_ROUTE)
+    }
+
+    fun navigateToStudy(documentId: String) {
+        val route = "${Screens.STUDY}/$documentId"
+        navController.navigate(route) {
+            launchSingleTop = true
+        }
     }
 
     fun navigateToImagePreview(imageName: String) {
@@ -111,13 +143,28 @@ class NavigationActions(private val navController: NavHostController) {
         }
     }
 
-    fun navigateBack() {
-        navController.popBackStack()
+    fun navigateComfirmFromOCR() {
+        navController.navigate(Destinations.DOCUMENTS_ROUTE) {
+            // Loại bỏ tất cả các màn hình đến màn tài liệu
+            popUpTo(Destinations.DOCUMENTS_ROUTE) {
+                inclusive = false // Không bao gồm màn hình tài liệu
+            }
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateDiscardFromOCR() {
+        navController.navigate(Destinations.CAPTURE_ROUTE) {
+            // Loại bỏ tất cả các màn hình đến màn hình Chụp ảnh
+            popUpTo(Destinations.CAPTURE_ROUTE) {
+                inclusive = false // Không bao gồm màn hình chụp ảnh
+            }
+            launchSingleTop = true
+        }
     }
 
 
-
-    fun navigateToCachedImages() {
-        navigateWithDefaultOptions(Destinations.CACHED_IMAGES_ROUTE)
+    fun navigateBack() {
+        navController.popBackStack()
     }
 }

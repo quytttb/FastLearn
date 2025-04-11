@@ -15,6 +15,9 @@ interface FlashcardDao {
     @Query("SELECT * FROM flashcards WHERE flashId = :flashId")
     suspend fun getFlashcardById(flashId: String): FlashcardEntity?
 
+    @Query("SELECT COUNT(*) FROM flashcards WHERE docId = :docId")
+    fun getFlashcardCountByDocId(docId: String): Flow<Int>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFlashcard(flashcard: FlashcardEntity)
 
