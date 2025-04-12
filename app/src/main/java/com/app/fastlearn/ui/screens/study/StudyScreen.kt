@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun StudyScreen(
     modifier: Modifier = Modifier,
-    documentId: String? = null,
     viewModel: StudyViewModel = hiltViewModel(),
     onSendProgress: (String) -> Unit,
     onNavigateBack: () -> Unit
@@ -44,7 +43,6 @@ fun StudyScreen(
     val studyProgress by viewModel.studyProgress.collectAsState()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     // Chuẩn bị các tùy chọn trả lời khi flashcards được tải
     LaunchedEffect(flashcards) {

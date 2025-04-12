@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class FlashcardRepositoryImpl @Inject constructor(
     private val flashcardDao: FlashcardDao,
     private val dataMapper: DataMapper
@@ -42,7 +44,7 @@ class FlashcardRepositoryImpl @Inject constructor(
 
     override fun getFlashcardById(id: String): Flow<Flashcard?> {
         return flow {
-            val entity = flashcardDao.getFlashcardById(id.toString())
+            val entity = flashcardDao.getFlashcardById(id)
             emit(entity?.let { dataMapper.mapFlashcardEntityToDomain(it) })
         }
     }

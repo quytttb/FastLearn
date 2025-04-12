@@ -8,7 +8,9 @@ import com.app.fastlearn.util.ProgressStatus
 import kotlinx.coroutines.flow.*
 import java.time.LocalDateTime
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ProgressRepositoryImpl @Inject constructor(
     private val progressDao: ProgressDao,
     private val flashcardDao: FlashcardDao,
@@ -102,12 +104,6 @@ class ProgressRepositoryImpl @Inject constructor(
                 "mostDifficultCards" to difficultCards,
                 "lastStudyDate" to lastStudyDate
             )
-        }
-    }
-
-    fun getAllProgress(): Flow<List<Progress>> {
-        return progressDao.getProgressByFlashId("").map { progressList ->
-            progressList.map { dataMapper.mapProgressEntityToDomain(it) }
         }
     }
 }

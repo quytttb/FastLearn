@@ -3,21 +3,31 @@ package com.app.fastlearn.ui.screens.documents
 import ExtendedFAB
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ListAlt
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.ContentPasteSearch
-import androidx.compose.material.icons.outlined.GridView
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,12 +36,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.app.fastlearn.R
+import com.app.fastlearn.domain.model.Document
 import com.app.fastlearn.ui.components.DocumentGridItem
 import com.app.fastlearn.ui.components.DocumentListItem
-import com.app.fastlearn.ui.components.SearchTopBar
-import com.app.fastlearn.R
+import com.app.fastlearn.ui.components.DocumentsTopBar
 import com.app.fastlearn.ui.components.EmptyScreen
-import com.app.fastlearn.ui.components.ListTopBar
+import com.app.fastlearn.ui.components.SearchTopBar
+import com.app.fastlearn.ui.components.SelectTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SuspiciousIndentation")
@@ -44,9 +56,11 @@ fun DocumentsScreen(
     onProfileClick: () -> Unit = {},
     onDocumentClick: (String) -> Unit
 ) {
-    // Trạng thái UI
+    // UI states
     val documents by viewModel.documents.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val isSelectionMode by viewModel.isSelectionMode.collectAsState()
+    val selectedDocumentIds by viewModel.selectedDocuments.collectAsState()
     var isSearchActive by remember { mutableStateOf(false) }
     var isGridView by remember { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
@@ -63,12 +77,24 @@ fun DocumentsScreen(
                         viewModel.clearSearch()
                     },
                     focusRequester = focusRequester,
-                    onSearch = {
-                        // Todo: Thêm logic tìm kiếm tại đây
-                        // Ví dụ: gọi API tìm kiếm hoặc lọc danh sách tài liệu
-                    })
+                    onSearch = {}
+                )
+            } else if (isSelectionMode) {
+                SelectTopBar(
+                    selectedCount = selectedDocumentIds.size,
+                    onBackClick = { viewModel.toggleSelectionMode() },
+                    onDeleteClick = { viewModel.deleteSelectedDocuments() },
+                    onCreateFlashcardsClick = {
+                        viewModel.createFlashcardsFromSelected(
+                            onSuccess = {
+                                viewModel.toggleSelectionMode()
+                            }
+                        )
+                    },
+                    onSelectAllClick = { viewModel.selectAllDocuments() }
+                )
             } else {
-                ListTopBar(
+                DocumentsTopBar(
                     title = stringResource(R.string.documents_screen_title),
                     showBackButton = false,
                     onBackClick = {},
@@ -76,16 +102,17 @@ fun DocumentsScreen(
                     isSearchActive = isSearchActive,
                     isGridView = isGridView,
                     onSearchClick = { isSearchActive = true },
-                    onToggleViewClick = { isGridView = !isGridView })
+                    onToggleViewClick = { isGridView = !isGridView },
+                    onSelect = { viewModel.toggleSelectionMode() }
+                )
             }
 
-            // Hiển thị danh sách trống nếu không có tài liệu
+            // Empty state
             if (documents.isEmpty()) {
                 EmptyScreen(modifier.fillMaxSize())
             }
-            // Danh sách tài liệu - Grid hoặc List
+            // Document list - Grid or List
             else if (!(isSearchActive && searchQuery.isEmpty())) {
-                // Danh sách tài liệu - Grid hoặc List
                 if (isGridView) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
@@ -93,26 +120,60 @@ fun DocumentsScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         items(documents) { document ->
+                            val isSelected = selectedDocumentIds.contains(document.docId)
                             DocumentGridItem(
                                 document = document,
-                                onDocumentClick = { doc -> onDocumentClick(doc.docId) })
+                                isSelected = isSelected,
+                                isSelectionMode = isSelectionMode,
+                                onDocumentClick = { doc ->
+                                    if (isSelectionMode) {
+                                        viewModel.toggleDocumentSelection(doc.docId)
+                                    } else {
+                                        onDocumentClick(doc.docId)
+                                    }
+                                },
+                                onLongClick = {
+                                    if (!isSelectionMode) {
+                                        viewModel.toggleSelectionMode()
+                                        viewModel.toggleDocumentSelection(document.docId)
+                                    }
+                                }
+                            )
                         }
                     }
                 } else {
                     LazyColumn(
-                        contentPadding = PaddingValues(8.dp), modifier = Modifier.weight(1f)
+                        contentPadding = PaddingValues(8.dp),
+                        modifier = Modifier.weight(1f)
                     ) {
                         items(documents) { document ->
+                            val isSelected = selectedDocumentIds.contains(document.docId)
                             DocumentListItem(
                                 document = document,
-                                onDocumentClick = { doc -> onDocumentClick(doc.docId) })
+                                isSelected = isSelected,
+                                isSelectionMode = isSelectionMode,
+                                onDocumentClick = { doc ->
+                                    if (isSelectionMode) {
+                                        viewModel.toggleDocumentSelection(doc.docId)
+                                    } else {
+                                        onDocumentClick(doc.docId)
+                                    }
+                                },
+                                onLongClick = {
+                                    if (!isSelectionMode) {
+                                        viewModel.toggleSelectionMode()
+                                        viewModel.toggleDocumentSelection(document.docId)
+                                    }
+                                }
+                            )
                         }
                     }
                 }
             } else {
-                // Hiển thị gợi ý tìm kiếm khi đang trong chế độ tìm kiếm với truy vấn trống
+                // Search suggestion when in search mode with empty query
                 Box(
-                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ContentPasteSearch,
@@ -124,10 +185,12 @@ fun DocumentsScreen(
             }
         }
 
-        // FAB để thêm tài liệu
-        ExtendedFAB(
-            onCameraClick = onOpenCamera,
-            onFileClick = onImportFile,
-        )
+        // FAB to add documents - show only when not in selection mode
+        if (!isSelectionMode) {
+            ExtendedFAB(
+                onCameraClick = onOpenCamera,
+                onFileClick = onImportFile,
+            )
+        }
     }
 }

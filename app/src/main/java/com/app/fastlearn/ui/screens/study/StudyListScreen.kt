@@ -89,12 +89,6 @@ fun StudyListScreen(
             if (documents.isEmpty()) {
                 EmptyScreen()
             } else {
-/*                Text(
-                    text = stringResource(id = R.string.select_document_to_study),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )*/
-
                 LazyColumn {
                     items(documents.filter { document ->
                         // Only show documents that have flashcards

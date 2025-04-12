@@ -81,23 +81,6 @@ fun FastLearnNavGraph(
             )
         }
 
-        // Updated StudyScreen composable with documentId argument
-        composable(
-            route = Destinations.STUDY_ROUTE,
-            arguments = listOf(
-                navArgument(DestinationsArgs.DOCUMENT_ID) { type = NavType.StringType }
-            )
-        ) { entry ->
-            StudyScreen(
-                modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
-                documentId = entry.arguments?.getString(DestinationsArgs.DOCUMENT_ID),
-                onSendProgress = { documentId ->
-                    //Todo: Xử lý gửi tiến trình sang profile
-                },
-                onNavigateBack = { navActions.navigateBack() },
-            )
-        }
-
         composable(
             Destinations.IMAGE_PREVIEW_ROUTE,
             arguments = listOf(
@@ -129,12 +112,30 @@ fun FastLearnNavGraph(
 
         composable(
             route = "${Destinations.DOCUMENT_DETAIL_ROUTE}/{documentId}",
-            arguments = listOf(navArgument("documentId") { type = NavType.StringType })
+            arguments = listOf(navArgument(DestinationsArgs.DOCUMENT_ID) {
+                type = NavType.StringType
+            })
         ) { entry ->
             DocumentDetailScreen(
-                documentId = entry.arguments?.getString("documentId")!!,
+                documentId = entry.arguments?.getString(DestinationsArgs.DOCUMENT_ID)!!,
                 modifier = Modifier.statusBarsPadding(),
                 onNavigateBack = { navActions.navigateBack() }
+            )
+        }
+
+        composable(
+            route = "${Destinations.STUDY_ROUTE}/{documentId}",
+            arguments = listOf(navArgument(DestinationsArgs.DOCUMENT_ID) {
+                type = NavType.StringType
+            })
+        ) { entry ->
+            StudyScreen(
+                //documentId = entry.arguments?.getString(DestinationsArgs.DOCUMENT_ID),
+                modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
+                onSendProgress = { documentId ->
+                    //Todo: Xử lý gửi tiến trình sang profile
+                },
+                onNavigateBack = { navActions.navigateBack() },
             )
         }
     }

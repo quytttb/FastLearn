@@ -8,6 +8,7 @@ import com.app.fastlearn.data.repository.FlashcardRepository
 import com.app.fastlearn.data.repository.ProgressRepository
 import com.app.fastlearn.domain.model.Flashcard
 import com.app.fastlearn.domain.model.Progress
+import com.app.fastlearn.ui.navigation.DestinationsArgs
 import com.app.fastlearn.util.ProgressStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,11 +45,13 @@ class StudyViewModel @Inject constructor(
 
     private val _startTime = MutableStateFlow<LocalDateTime>(LocalDateTime.now())
 
-    val currentDocumentId: String = savedStateHandle.get<String>("documentId")
-        ?: savedStateHandle.get<String>("documentId")
-        ?: "20250410115413" //Todo: Giá trị đang fix cứng, cần sửa
+    val currentDocumentId: String =
+        checkNotNull(savedStateHandle.get<String>(DestinationsArgs.DOCUMENT_ID)) {
+            "documentId parameter was not found. Please make sure it's passed correctly in the navigation route."
+        }
 
     init {
+        Log.d("StudyViewModel", "Initializing with document ID: $currentDocumentId")
         loadFlashcards(currentDocumentId)
     }
 
@@ -56,12 +59,14 @@ class StudyViewModel @Inject constructor(
     private fun loadFlashcards(documentId: String) {
         viewModelScope.launch {
             try {
+                Log.d("StudyViewModel", "Loading flashcards for document ID: $documentId")
                 flashcardRepository.getFlashcardsByDocumentId(documentId).collect { cards ->
                     _flashcards.value = cards.shuffled() // Shuffle the cards for better learning
                     if (cards.isNotEmpty()) {
                         _currentCardIndex.value = 0
                         prepareAnswerOptions()
                         _startTime.value = LocalDateTime.now()
+                        Log.d("StudyViewModel", "Loaded ${cards.size} flashcards")
                     } else {
                         Log.w("StudyViewModel", "No flashcards found for document ID: $documentId")
                     }

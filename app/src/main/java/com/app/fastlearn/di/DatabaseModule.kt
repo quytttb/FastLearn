@@ -20,23 +20,22 @@ object DatabaseModule {
     @Singleton
     @Provides
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "fastlearn_database"
-        ).build()
+        return AppDatabase.getDatabase(context)
     }
 
+    @Singleton
     @Provides
     fun provideDocumentDao(appDatabase: AppDatabase): DocumentDao {
         return appDatabase.documentDao()
     }
 
+    @Singleton
     @Provides
     fun provideFlashcardDao(appDatabase: AppDatabase): FlashcardDao {
         return appDatabase.flashcardDao()
     }
 
+    @Singleton
     @Provides
     fun provideProgressDao(appDatabase: AppDatabase): ProgressDao {
         return appDatabase.progressDao()
