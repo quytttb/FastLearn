@@ -2,14 +2,12 @@ package com.app.fastlearn.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,23 +35,22 @@ import com.app.fastlearn.util.DateTimeUtils
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DocumentGridItem(
+fun DocumentListItem(
     document: Document,
-    isSelected: Boolean = false,
+    isSelected: Boolean,
     isSelectionMode: Boolean = false,
     onDocumentClick: (Document) -> Unit,
     onLongClick: () -> Unit = {}
 ) {
-    Box(modifier = Modifier.padding(4.dp)) {
+    Box(modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp)
                 .combinedClickable(
                     onClick = { onDocumentClick(document) },
                     onLongClick = onLongClick
                 ),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(8.dp),
             colors = CardDefaults.cardColors(
                 containerColor = if (isSelected)
                     MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
@@ -70,29 +67,27 @@ fun DocumentGridItem(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(12.dp)
             ) {
                 Text(
                     text = document.title,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = document.content,
                     fontSize = 14.sp,
-                    maxLines = 6,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = document.category,
@@ -112,8 +107,8 @@ fun DocumentGridItem(
         if (isSelected) {
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 16.dp)
                     .size(24.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primary)

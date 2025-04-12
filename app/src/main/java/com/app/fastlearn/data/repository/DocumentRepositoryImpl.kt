@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class DocumentRepositoryImpl @Inject constructor(
     private val documentDao: DocumentDao,
     private val dataMapper: DataMapper
@@ -32,7 +34,7 @@ class DocumentRepositoryImpl @Inject constructor(
 
     override fun getDocumentById(id: String): Flow<Document?> {
         return flow {
-            val entity = documentDao.getDocumentById(id.toString())
+            val entity = documentDao.getDocumentById(id)
             emit(entity?.let { dataMapper.mapDocumentEntityToDomain(it) })
         }
     }

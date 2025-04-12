@@ -44,5 +44,10 @@
     <string name="start_quiz">Bắt đầu kiểm tra</string>
     <string name="study_completed">Học xong!</string>
     <string name="correct_answers_count">Đúng: %1$d/%2$d</string>
-    <string name="add_document">Add Document</string>
+    <string name="add_document">Thêm tài liệu</string>
+    <string name="select">Chọn</string>
+    <string name="select_all">Chọn tất cả</string>
+    <string name="delete">Xóa</string>
+    <string name="select_items">Chọn mục</string>
+    <string name="selected_items_count">Đã chọn: %1$d</string>
 </resources>

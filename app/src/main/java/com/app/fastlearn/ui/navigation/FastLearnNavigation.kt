@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import com.app.fastlearn.ui.navigation.DestinationsArgs.IMAGE_NAME
 import com.app.fastlearn.ui.navigation.DestinationsArgs.RECOGNIZED_TEXT_ID
 import com.app.fastlearn.R
+import com.app.fastlearn.ui.navigation.DestinationsArgs.DOCUMENT_ID
 
 /**
  * Định nghĩa [Screens]
@@ -46,11 +47,10 @@ object Destinations {
     const val CAPTURE_ROUTE = Screens.CAPTURE
     const val FLASHCARDS_ROUTE = Screens.FLASHCARDS
     const val STUDY_LIST_ROUTE = Screens.STUDY_LIST
-    const val STUDY_ROUTE = "${Screens.STUDY}/{${DestinationsArgs.DOCUMENT_ID}}"
     const val IMAGE_PREVIEW_ROUTE = "${Screens.IMAGE_PREVIEW}/{$IMAGE_NAME}"
     const val OCR_ROUTE = "${Screens.OCR}/{$RECOGNIZED_TEXT_ID}"
-    const val DOCUMENT_DETAIL_ROUTE = "${Screens.DOCUMENT_DETAIL}/{$IMAGE_NAME}"
-
+    const val DOCUMENT_DETAIL_ROUTE = "${Screens.DOCUMENT_DETAIL}/{$DOCUMENT_ID}"
+    const val STUDY_ROUTE = "${Screens.STUDY}/{${DOCUMENT_ID}}"
 }
 
 /**
@@ -101,10 +101,10 @@ class NavigationActions(private val navController: NavHostController) {
         navigateWithDefaultOptions(Destinations.DOCUMENTS_ROUTE)
     }
 
-fun navigateToDocumentDetail(documentId: String) {
-    val route = "${Destinations.DOCUMENT_DETAIL_ROUTE}/$documentId"
-    navigateWithDefaultOptions(route)
-}
+    fun navigateToDocumentDetail(documentId: String) {
+        val route = "${Destinations.DOCUMENT_DETAIL_ROUTE}/$documentId"
+        navigateWithDefaultOptions(route)
+    }
 
     fun navigateToCapture() {
         navigateWithDefaultOptions(Destinations.CAPTURE_ROUTE)
@@ -119,10 +119,8 @@ fun navigateToDocumentDetail(documentId: String) {
     }
 
     fun navigateToStudy(documentId: String) {
-        val route = "${Screens.STUDY}/$documentId"
-        navController.navigate(route) {
-            launchSingleTop = true
-        }
+        val route = "${Destinations.STUDY_ROUTE}/$documentId"
+        navigateWithDefaultOptions(route)
     }
 
     fun navigateToImagePreview(imageName: String) {

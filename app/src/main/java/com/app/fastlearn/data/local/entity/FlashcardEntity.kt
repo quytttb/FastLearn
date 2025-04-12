@@ -13,7 +13,7 @@ import java.time.LocalDateTime
             entity = DocumentEntity::class,
             parentColumns = ["docId"],
             childColumns = ["docId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.CASCADE // Xóa flashcard khi tài liệu bị xóa
         )
     ],
     indices = [Index("docId")]

@@ -28,6 +28,14 @@ class DocumentsViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
+    // Trạng thái chế độ chọn tài liệu
+    private val _isSelectionMode = MutableStateFlow(false)
+    val isSelectionMode: StateFlow<Boolean> = _isSelectionMode
+
+    // Trạng thái tài liệu đã chọn
+    private val _selectedDocuments = MutableStateFlow<Set<String>>(emptySet())
+    val selectedDocuments: StateFlow<Set<String>> = _selectedDocuments
+
     // Lọc tài liệu theo truy vấn
     val documents: StateFlow<List<Document>> = combine(_allDocuments, _searchQuery) { docs, query ->
         if (query.isBlank()) {
@@ -57,8 +65,41 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
+    // Chuyển đổi chế độ chọn tài liệu
+    fun toggleSelectionMode() {
+        _isSelectionMode.value = !_isSelectionMode.value
+        if (!_isSelectionMode.value) {
+            clearSelection()
+        }
+    }
+
+    // Chọn hoặc bỏ chọn tài liệu
+    fun toggleDocumentSelection(docId: String) {
+        val currentSelection = _selectedDocuments.value.toMutableSet()
+        if (currentSelection.contains(docId)) {
+            currentSelection.remove(docId)
+        } else {
+            currentSelection.add(docId)
+        }
+        _selectedDocuments.value = currentSelection
+    }
+
+    // Chọn tài liệu
+    fun clearSelection() {
+        _selectedDocuments.value = emptySet()
+    }
+
+    // Chọn tất cả tài liệu
+    fun selectAllDocuments() {
+        _selectedDocuments.value = _allDocuments.value.map { it.docId }.toSet()
+    }
+
+    // Bỏ chọn tất cả tài liệu
+    fun getSelectedDocumentsObjects(): List<Document> {
+        return _allDocuments.value.filter { _selectedDocuments.value.contains(it.docId) }
+    }
+
     // Lấy tài liệu theo ID
-    // In DocumentsViewModel.kt
     fun getDocumentById(documentId: String): Document? {
         return _allDocuments.value.find { it.docId == documentId }
     }
@@ -86,16 +127,11 @@ class DocumentsViewModel @Inject constructor(
                         documentId = document.docId,
                         apiKey = BuildConfig.apiKey
                     )
-
                     result.fold(
                         onSuccess = { flashcards ->
-                            // Xử lý thành công, có thể cập nhật UI state
-                            Log.d("ViewModel", "Created ${flashcards.size} flashcards")
                             onSuccess()
                         },
                         onFailure = { error ->
-                            // Xử lý lỗi, có thể cập nhật UI state
-                            Log.e("ViewModel", "Failed to create flashcards", error)
                             onError(Exception(error))
                         }
                     )
@@ -104,6 +140,54 @@ class DocumentsViewModel @Inject constructor(
                     onError(e)
                 }
             }
+        }
+    }
+
+    // Tạo flashcards từ tài liệu đã chọn
+    fun createFlashcardsFromSelected(
+        onSuccess: () -> Unit = {},
+        onError: (Exception) -> Unit = {}
+    ) {
+        if (_selectedDocuments.value.isEmpty()) return
+
+        viewModelScope.launch {
+            try {
+                val selectedDocs = getSelectedDocumentsObjects()
+                // For simplicity, we'll create flashcards for the first selected document
+                // In a real app, you might want to handle multiple documents differently
+                selectedDocs.firstOrNull()?.let { document ->
+                    createFlashcard(document, onSuccess, onError)
+                }
+            } catch (e: Exception) {
+                onError(e)
+            }
+        }
+    }
+
+    // Xóa tài liệu
+    fun deleteDocument(document: Document) {
+        viewModelScope.launch {
+            documentRepository.deleteDocument(document)
+            loadDocuments()
+        }
+    }
+
+    // Xóa các tài liệu đã chọn
+    fun deleteSelectedDocuments() {
+        viewModelScope.launch {
+            val docsToDelete = getSelectedDocumentsObjects()
+            docsToDelete.forEach { documentRepository.deleteDocument(it) }
+            clearSelection()
+            toggleSelectionMode()
+            loadDocuments()
+        }
+    }
+
+    // Xóa tất cả tài liệu
+    fun deleteAllDocuments() {
+        viewModelScope.launch {
+            _allDocuments.value.forEach { documentRepository.deleteDocument(it) }
+            loadDocuments()
         }
     }
 }

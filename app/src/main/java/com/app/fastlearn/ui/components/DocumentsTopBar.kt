@@ -8,8 +8,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ListAlt
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,10 +30,11 @@ import com.app.fastlearn.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListTopBar(
+fun DocumentsTopBar(
     title: String,
     showBackButton: Boolean = false,
     onBackClick: () -> Unit = {},
+    onSelect : () -> Unit = {},
     onProfileClick: () -> Unit,
     isSearchActive: Boolean,
     isGridView: Boolean,
@@ -61,6 +64,12 @@ fun ListTopBar(
                 Icon(
                     imageVector = if (isGridView) Icons.AutoMirrored.Outlined.ListAlt else Icons.Outlined.GridView,
                     contentDescription = stringResource(R.string.toggle_view)
+                )
+            }
+            IconButton(onClick = onSelect) {
+                Icon(
+                    imageVector = Icons.Outlined.CheckCircle,
+                    contentDescription = stringResource(R.string.select)
                 )
             }
             IconButton(
