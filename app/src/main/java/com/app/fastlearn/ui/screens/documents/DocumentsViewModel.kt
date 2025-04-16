@@ -8,113 +8,192 @@ import com.app.fastlearn.data.repository.DocumentRepository
 import com.app.fastlearn.domain.model.Document
 import com.app.fastlearn.domain.usecase.CreateFlashcardsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class DocumentsViewModel @Inject constructor(
     private val documentRepository: DocumentRepository,
     private val createFlashcardsUseCase: CreateFlashcardsUseCase
 ) : ViewModel() {
-    // Tạo danh sách tài liệu mẫu
-    private val _allDocuments = MutableStateFlow<List<Document>>(emptyList())
 
-    // Trạng thái truy vấn tài liệu
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery
-
-    // Trạng thái chế độ chọn tài liệu
-    private val _isSelectionMode = MutableStateFlow(false)
-    val isSelectionMode: StateFlow<Boolean> = _isSelectionMode
-
-    // Trạng thái tài liệu đã chọn
-    private val _selectedDocuments = MutableStateFlow<Set<String>>(emptySet())
-    val selectedDocuments: StateFlow<Set<String>> = _selectedDocuments
-
-    // Lọc tài liệu theo truy vấn
-    val documents: StateFlow<List<Document>> = combine(_allDocuments, _searchQuery) { docs, query ->
-        if (query.isBlank()) {
-            docs
-        } else {
-            docs.filter { doc ->
-                doc.title.contains(query, ignoreCase = true) ||
-                        doc.content.contains(query, ignoreCase = true)
-            }
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
+    // Unified UI state for Documents screen
+    data class DocumentsUiState(
+        val allDocuments: List<Document> = emptyList(),
+        val searchQuery: String = "",
+        val searchResults: List<Document> = emptyList(),
+        val isLoading: Boolean = false,
+        val isError: Boolean = false,
+        val errorMessage: String = "",
+        val isSelectionMode: Boolean = false,
+        val selectedDocuments: Set<String> = emptySet()
     )
 
+    // Private MutableStateFlow to hold UI state
+    private val _uiState = MutableStateFlow(DocumentsUiState())
+
+    // Public immutable StateFlow for UI
+    val uiState: StateFlow<DocumentsUiState> = _uiState.asStateFlow()
+
+    // Search debounce settings
+    private val searchDebounceTimeMillis = 300L
+    private var searchJob: Job? = null
+
     init {
-        // Tải danh sách tài liệu
+        // Load initial documents
         loadDocuments()
+
+        // Setup search query flow
+        viewModelScope.launch {
+            _uiState
+                .debounce(searchDebounceTimeMillis)
+                .collect { state ->
+                    if (state.searchQuery.isBlank()) {
+                        // If query is blank, just show all documents
+                        _uiState.update { it.copy(
+                            searchResults = it.allDocuments,
+                            isLoading = false
+                        )}
+                    } else if (state.isLoading) {
+                        // Only perform search if loading state is true
+                        performSearch(state.searchQuery)
+                    }
+                }
+        }
     }
 
     private fun loadDocuments() {
         viewModelScope.launch {
-            documentRepository.getAllDocuments().collect {
-                _allDocuments.value = it
+            _uiState.update { it.copy(isLoading = true, isError = false) }
+
+            try {
+                documentRepository.getAllDocuments().collect { documents ->
+                    _uiState.update { state ->
+                        state.copy(
+                            allDocuments = documents,
+                            searchResults = if (state.searchQuery.isBlank()) documents else state.searchResults,
+                            isLoading = false
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    isError = true,
+                    errorMessage = e.message ?: "Lỗi khi tải tài liệu"
+                )}
+                Log.e("DocumentsViewModel", "Error loading documents", e)
             }
         }
     }
 
-    // Chuyển đổi chế độ chọn tài liệu
-    fun toggleSelectionMode() {
-        _isSelectionMode.value = !_isSelectionMode.value
-        if (!_isSelectionMode.value) {
-            clearSelection()
+    // Update search query and trigger search
+    fun updateSearchQuery(query: String) {
+        if (query != _uiState.value.searchQuery) {
+            _uiState.update { it.copy(
+                searchQuery = query,
+                isLoading = true  // This will trigger the debounced search in the collector
+            )}
         }
     }
 
-    // Chọn hoặc bỏ chọn tài liệu
-    fun toggleDocumentSelection(docId: String) {
-        val currentSelection = _selectedDocuments.value.toMutableSet()
-        if (currentSelection.contains(docId)) {
-            currentSelection.remove(docId)
-        } else {
-            currentSelection.add(docId)
+    // Perform search operation
+    private fun performSearch(query: String) {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            try {
+                if (query.isBlank()) {
+                    _uiState.update { it.copy(
+                        searchResults = it.allDocuments,
+                        isLoading = false,
+                        isError = false
+                    )}
+                    return@launch
+                }
+
+                documentRepository.searchDocuments(query).collect { results ->
+                    _uiState.update { it.copy(
+                        searchResults = results,
+                        isLoading = false,
+                        isError = false
+                    )}
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    isError = true,
+                    errorMessage = e.message ?: "Lỗi tìm kiếm"
+                )}
+                Log.e("DocumentsViewModel", "Error searching documents", e)
+            }
         }
-        _selectedDocuments.value = currentSelection
     }
 
-    // Chọn tài liệu
-    fun clearSelection() {
-        _selectedDocuments.value = emptySet()
-    }
-
-    // Chọn tất cả tài liệu
-    fun selectAllDocuments() {
-        _selectedDocuments.value = _allDocuments.value.map { it.docId }.toSet()
-    }
-
-    // Bỏ chọn tất cả tài liệu
-    fun getSelectedDocumentsObjects(): List<Document> {
-        return _allDocuments.value.filter { _selectedDocuments.value.contains(it.docId) }
-    }
-
-    // Lấy tài liệu theo ID
-    fun getDocumentById(documentId: String): Document? {
-        return _allDocuments.value.find { it.docId == documentId }
-    }
-
-    // Cập nhật truy vấn tìm kiếm
-    fun setSearchQuery(query: String) {
-        _searchQuery.value = query
-    }
-
-    // Xóa truy vấn tìm kiếm
+    // Clear search
     fun clearSearch() {
-        _searchQuery.value = ""
+        _uiState.update { it.copy(
+            searchQuery = "",
+            searchResults = it.allDocuments,
+            isLoading = false,
+            isError = false
+        )}
     }
 
-    // Tạo flashcards từ tài liệu
+    // Toggle selection mode
+    fun toggleSelectionMode() {
+        _uiState.update { state ->
+            state.copy(
+                isSelectionMode = !state.isSelectionMode,
+                selectedDocuments = if (state.isSelectionMode) emptySet() else state.selectedDocuments
+            )
+        }
+    }
+
+    // Toggle document selection
+    fun toggleDocumentSelection(docId: String) {
+        _uiState.update { state ->
+            val currentSelection = state.selectedDocuments.toMutableSet()
+            if (currentSelection.contains(docId)) {
+                currentSelection.remove(docId)
+            } else {
+                currentSelection.add(docId)
+            }
+            state.copy(selectedDocuments = currentSelection)
+        }
+    }
+
+    // Clear selection
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedDocuments = emptySet()) }
+    }
+
+    // Select all documents
+    fun selectAllDocuments() {
+        _uiState.update { state ->
+            state.copy(selectedDocuments = state.allDocuments.map { it.docId }.toSet())
+        }
+    }
+
+    // Get selected documents as objects
+    fun getSelectedDocumentsObjects(): List<Document> {
+        val state = _uiState.value
+        return state.allDocuments.filter { state.selectedDocuments.contains(it.docId) }
+    }
+
+    // Get document by ID
+    fun getDocumentById(documentId: String): Document? {
+        return _uiState.value.allDocuments.find { it.docId == documentId }
+    }
+
+    // Create flashcards from document
     fun createFlashcard(
         document: Document?,
         onSuccess: () -> Unit = {},
@@ -143,18 +222,17 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Tạo flashcards từ tài liệu đã chọn
+    // Create flashcards from selected documents
     fun createFlashcardsFromSelected(
         onSuccess: () -> Unit = {},
         onError: (Exception) -> Unit = {}
     ) {
-        if (_selectedDocuments.value.isEmpty()) return
+        if (_uiState.value.selectedDocuments.isEmpty()) return
 
         viewModelScope.launch {
             try {
                 val selectedDocs = getSelectedDocumentsObjects()
                 // For simplicity, we'll create flashcards for the first selected document
-                // In a real app, you might want to handle multiple documents differently
                 selectedDocs.firstOrNull()?.let { document ->
                     createFlashcard(document, onSuccess, onError)
                 }
@@ -164,7 +242,7 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Xóa tài liệu
+    // Delete document
     fun deleteDocument(document: Document) {
         viewModelScope.launch {
             documentRepository.deleteDocument(document)
@@ -172,21 +250,23 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Xóa các tài liệu đã chọn
+    // Delete selected documents
     fun deleteSelectedDocuments() {
         viewModelScope.launch {
             val docsToDelete = getSelectedDocumentsObjects()
             docsToDelete.forEach { documentRepository.deleteDocument(it) }
-            clearSelection()
-            toggleSelectionMode()
+            _uiState.update { it.copy(
+                selectedDocuments = emptySet(),
+                isSelectionMode = false
+            )}
             loadDocuments()
         }
     }
 
-    // Xóa tất cả tài liệu
+    // Delete all documents
     fun deleteAllDocuments() {
         viewModelScope.launch {
-            _allDocuments.value.forEach { documentRepository.deleteDocument(it) }
+            _uiState.value.allDocuments.forEach { documentRepository.deleteDocument(it) }
             loadDocuments()
         }
     }

@@ -75,9 +75,6 @@ fun FastLearnNavGraph(
                 onDocumentSelected = { documentId ->
                     navActions.navigateToStudy(documentId)
                 },
-                onNavigateToDocuments = {
-                    navActions.navigateToDocuments()
-                }
             )
         }
 
@@ -119,7 +116,7 @@ fun FastLearnNavGraph(
             DocumentDetailScreen(
                 documentId = entry.arguments?.getString(DestinationsArgs.DOCUMENT_ID)!!,
                 modifier = Modifier.statusBarsPadding(),
-                onNavigateBack = { navActions.navigateBack() }
+                onNavigateBack = { navActions.navigateToDocuments() }
             )
         }
 
@@ -135,7 +132,7 @@ fun FastLearnNavGraph(
                 onSendProgress = { documentId ->
                     //Todo: Xử lý gửi tiến trình sang profile
                 },
-                onNavigateBack = { navActions.navigateBack() },
+                onNavigateBack = { navActions.navigateToStudyList() },
             )
         }
     }

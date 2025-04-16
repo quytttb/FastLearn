@@ -1,5 +1,6 @@
 package com.app.fastlearn.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -134,7 +135,7 @@ private fun CardContent(
     text: String,
     isFrontSide: Boolean
 ) {
-    androidx.compose.animation.AnimatedVisibility(visible = isVisible) {
+    AnimatedVisibility(visible = isVisible) {
         val contentModifier = if (isFrontSide) {
             Modifier.graphicsLayer { rotationY = rotation }
         } else {

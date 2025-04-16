@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -26,10 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.app.fastlearn.R
 import com.app.fastlearn.domain.model.Document
 import com.app.fastlearn.util.DateTimeUtils
 
@@ -39,6 +42,7 @@ fun DocumentListItem(
     document: Document,
     isSelected: Boolean,
     isSelectionMode: Boolean = false,
+    flashcardCount: Int = 0,
     onDocumentClick: (Document) -> Unit,
     onLongClick: () -> Unit = {}
 ) {
@@ -59,7 +63,7 @@ fun DocumentListItem(
             ),
             border = if (isSelected)
                 androidx.compose.foundation.BorderStroke(
-                    width = 2.dp,
+                    width = 4.dp,
                     color = MaterialTheme.colorScheme.primary
                 )
             else
@@ -75,8 +79,10 @@ fun DocumentListItem(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
                 )
+
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = document.content,
@@ -87,13 +93,22 @@ fun DocumentListItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = document.category,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    // Moved flashcard badge here
+                    if (flashcardCount > 0) {
+                        Badge(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ) {
+                            Text(
+                                text = stringResource(R.string.flashcards, flashcardCount),
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+
                     Text(
                         text = DateTimeUtils.formatDate(document.createdDate.toString()),
                         fontSize = 12.sp,

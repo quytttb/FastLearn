@@ -9,4 +9,5 @@ interface DocumentRepository {
     suspend fun deleteDocument(document: Document)
     fun getDocumentById(id: String): Flow<Document?>
     suspend fun updateDocument(document: Document)
+    fun searchDocuments(query: String): Flow<List<Document>>
 }

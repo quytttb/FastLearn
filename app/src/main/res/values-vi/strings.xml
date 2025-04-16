@@ -24,6 +24,7 @@
     <string name="profile">Hồ sơ</string>
     <string name="empty_title">Chưa có mục nào</string>
     <string name="empty_content">Bấm vào nút + để tạo mục mới</string>
+    <string name="flashcards">%d thẻ</string>
     <string name="add_new_flashcard">Thêm thẻ ghi nhớ mới</string>
     <string name="shuffle_flashcards">Xáo trộn thẻ ghi nhớ</string>
     <string name="tab_flashcards">Thẻ ghi nhớ</string>
@@ -47,7 +48,15 @@
     <string name="add_document">Thêm tài liệu</string>
     <string name="select">Chọn</string>
     <string name="select_all">Chọn tất cả</string>
-    <string name="delete">Xóa</string>
     <string name="select_items">Chọn mục</string>
     <string name="selected_items_count">Đã chọn: %1$d</string>
+    <string name="search_results_for">Kết quả tìm kiếm cho \"%s\"</string>
+    <string name="no_search_results">Không tìm thấy tài liệu nào phù hợp</string>
+    <string name="try_different_search">Thử sử dụng từ khóa khác hoặc kiểm tra lỗi chính tả</string>
+    <string name="no_documents_for_flashcards">Không có tài liệu nào để tạo flashcard</string>
+    <!-- Delete Document Dialog Strings -->
+    <string name="delete_documents">Xóa Tài liệu</string>
+    <string name="delete_document_confirmation">Bạn có muốn xóa tài liệu này không?</string>
+    <string name="delete_multiple_documents_confirmation">Bạn có muốn xóa %d tài liệu này không?</string>
+    <string name="delete">Xóa</string>
 </resources>

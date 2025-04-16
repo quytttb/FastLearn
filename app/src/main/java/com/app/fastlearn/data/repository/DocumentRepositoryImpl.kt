@@ -43,4 +43,10 @@ class DocumentRepositoryImpl @Inject constructor(
         val documentEntity = dataMapper.mapDocumentDomainToEntity(document)
         documentDao.insertDocument(documentEntity) // Dùng insert để cập nhật
     }
+
+    override fun searchDocuments(query: String): Flow<List<Document>> {
+        return documentDao.searchDocuments(query).map { entities ->
+            entities.map { dataMapper.mapDocumentEntityToDomain(it) }
+        }
+    }
 }

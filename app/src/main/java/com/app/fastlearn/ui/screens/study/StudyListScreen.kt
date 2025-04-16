@@ -1,28 +1,25 @@
 package com.app.fastlearn.ui.screens.study
 
-import android.util.Log
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Badge
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -37,9 +34,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.fastlearn.R
-import com.app.fastlearn.domain.model.Document
+import com.app.fastlearn.ui.components.DocumentListItem
 import com.app.fastlearn.ui.components.EmptyScreen
 import com.app.fastlearn.ui.screens.documents.DocumentsViewModel
+import com.app.fastlearn.ui.screens.flashcards.FlashcardsListTab
+import com.app.fastlearn.ui.screens.flashcards.FlashcardsTab
 import com.app.fastlearn.ui.screens.flashcards.FlashcardsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,108 +48,61 @@ fun StudyListScreen(
     documentsViewModel: DocumentsViewModel = hiltViewModel(),
     flashcardsViewModel: FlashcardsViewModel = hiltViewModel(),
     onDocumentSelected: (String) -> Unit,
-    onNavigateToDocuments: () -> Unit
 ) {
-    val documents by documentsViewModel.documents.collectAsState()
-
-    // Map to store flashcard counts for each document
+    val documents by documentsViewModel.uiState.collectAsState()
+    val documentsToDisplay = documents.allDocuments
     val flashcardCounts = remember { mutableStateMapOf<String, Int>() }
 
-    // Load flashcard counts for all documents when the screen is displayed
-    LaunchedEffect(documents) {
-        documents.forEach { document ->
+    // Load flashcard counts when documents change
+    LaunchedEffect(documentsToDisplay) {
+        documentsToDisplay.forEach { document ->
             flashcardsViewModel.getFlashcardCountForDocument(document.docId) { count ->
                 flashcardCounts[document.docId] = count
             }
         }
     }
 
-    Scaffold(
-        topBar = {
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
-                title = { Text(stringResource(R.string.study_screen_title)) }
+                title = { Text(stringResource(R.string.study_screen_title)) },
+
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToDocuments) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(id = R.string.add_document)
+            if (documents.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (documentsToDisplay.isEmpty()) {
+                EmptyScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    vectorImage = Icons.Outlined.CreditCard,
+                    title = stringResource(R.string.empty_title),
+                    message = stringResource(R.string.no_documents_for_flashcards)
                 )
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            if (documents.isEmpty()) {
-                EmptyScreen()
             } else {
-                LazyColumn {
-                    items(documents.filter { document ->
-                        // Only show documents that have flashcards
-                        flashcardCounts[document.docId] ?: 0 > 0
-                    }) { document ->
-                        DocumentItem(
-                            document = document,
-                            flashcardCount = flashcardCounts[document.docId] ?: 0,
-                            onClick = {
-                                onDocumentSelected(document.docId)
-                            }
-                        )
+                LazyColumn(
+                    contentPadding = PaddingValues(8.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(documentsToDisplay) { document ->
+                        // Chỉ hiển thị tài liệu có flashcard
+                        val flashcardCount = flashcardCounts[document.docId] ?: 0
+                        if (flashcardCount > 0) {
+                            DocumentListItem(
+                                document = document,
+                                isSelected = false,
+                                isSelectionMode = false,
+                                flashcardCount = flashcardCount,
+                                onDocumentClick = {
+                                    onDocumentSelected(document.docId)
+                                }
+                            )
+                        }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DocumentItem(
-    document: Document,
-    flashcardCount: Int,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = document.title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Created: ${document.createdDate.toLocalDate()}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Badge(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ) {
-                Text(
-                    text = "$flashcardCount cards",
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
             }
         }
     }

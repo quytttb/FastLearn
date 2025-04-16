@@ -23,4 +23,7 @@ interface DocumentDao {
 
     @Query("DELETE FROM documents WHERE docId = :docId")
     suspend fun deleteDocumentById(docId: String)
+
+    @Query("SELECT * FROM documents WHERE title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%'")
+    fun searchDocuments(query: String): Flow<List<DocumentEntity>>
 }
