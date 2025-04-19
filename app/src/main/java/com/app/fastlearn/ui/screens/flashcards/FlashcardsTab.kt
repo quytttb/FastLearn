@@ -27,8 +27,14 @@ fun FlashcardsTab(viewModel: FlashcardsViewModel) {
     val flashcards by viewModel.flashcards.collectAsState()
     val currentCardIndex by viewModel.currentCardIndex.collectAsState()
     val isFlipped by viewModel.isFlipped.collectAsState()
+    // Lấy thẻ flashcard hiện tại
     val currentCard = if (flashcards.isNotEmpty()) {
         flashcards[currentCardIndex % flashcards.size]
+    } else null
+
+    // Lấy thẻ flashcard tiếp theo để hiển thị dưới thẻ hiện tại
+    val nextCard = if (flashcards.isNotEmpty() && flashcards.size > 1) {
+        flashcards[(currentCardIndex + 1) % flashcards.size]
     } else null
 
     Box(
@@ -55,6 +61,7 @@ fun FlashcardsTab(viewModel: FlashcardsViewModel) {
 
                 FlashcardItem(
                     flashcard = currentCard,
+                    nextFlashcard = nextCard,
                     isFlipped = isFlipped,
                     onFlip = { viewModel.toggleFlip() },
                     onSwipe = { viewModel.moveToNextCard() }

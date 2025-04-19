@@ -1,6 +1,7 @@
 package com.app.fastlearn.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,12 +9,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.zIndex
 import com.app.fastlearn.domain.model.Flashcard
 import com.app.fastlearn.ui.animations.dragOpacityAnimation
 import com.app.fastlearn.ui.animations.flipAnimation
@@ -23,43 +29,255 @@ import kotlin.math.abs
 @Composable
 fun FlashcardItem(
     flashcard: Flashcard?,
+    nextFlashcard: Flashcard?,
     isFlipped: Boolean,
     onFlip: () -> Unit,
     onSwipe: () -> Unit,
-    dragSpeedMultiplier: Float = 0.5f // Tốc độ kéo thẻ, giá trị càng cao thì tốc độ kéo càng nhanh
+    dragSpeedMultiplier: Float = 0.5f
 ) {
     val scope = rememberCoroutineScope()
 
     // Trạng thái kết hợp để theo dõi vị trí kéo
-    var offset by remember { mutableStateOf(Pair(0f, 0f)) }
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
     var isDragging by remember { mutableStateOf(false) }
 
-    // Áp dụng hoạt hình cho độ mờ và góc quay
+    // Thêm trạng thái cho hiệu ứng mượt
+    var swiped by remember { mutableStateOf(false) }
+
+    // Thêm trạng thái theo dõi việc swipe thành công
+    var isSuccessfulSwipe by remember { mutableStateOf(false) }
+
+    // Sử dụng animatables cho hiệu ứng mượt
+    val animatedOffsetX = remember { Animatable(0f) }
+    val animatedOffsetY = remember { Animatable(0f) }
+
+    // Độ mờ của thẻ kế tiếp (tăng dần khi current card biến mất)
+    val nextCardOpacity = remember { Animatable(0f) }
+
+    // Animatable cho hiệu ứng màu sắc chuyển đổi của thẻ kế tiếp
+    val nextCardColorTransition = remember { Animatable(0f) }
+
+    // Hiệu ứng cho current card
     val rotation = flipAnimation(isFlipped)
     val opacity = dragOpacityAnimation(isDragging)
 
     // Kiểm tra xem có phải là cử chỉ kéo hay không
-    // Nếu độ dịch chuyển lớn hơn 100dp thì coi như là cử chỉ kéo
-    fun isSwipeGesture() = abs(offset.first) > 100 || abs(offset.second) > 100
+    fun isSwipeGesture() = abs(offsetX) > 100 || abs(offsetY) > 100
 
-    // Xử lí hoàn thành cử chỉ kéo
+    // Xử lí hoàn thành cử chỉ kéo với hiệu ứng mượt
     fun completeSwipe() {
         if (isSwipeGesture()) {
+            // Xác định hướng vuốt để tạo hiệu ứng biến mất
+            val directionX = if (offsetX > 0) 1.5f else -1.5f
+            val directionY = if (offsetY > 0) 1f else -1f
+            swiped = true
+            isSuccessfulSwipe = true
+
             scope.launch {
+                // Hiệu ứng thẻ kế tiếp hiện ra và chuyển đổi màu
+                launch {
+                    // Chạy đồng thời cả độ opacity và chuyển đổi màu
+                    nextCardOpacity.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(300)
+                    )
+                    nextCardColorTransition.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(300)
+                    )
+                }
+
+                // Thẻ hiện tại di chuyển theo hướng vuốt và biến mất
+                val targetX = offsetX + 1000 * directionX
+                val targetY = offsetY + 500 * directionY
+
+                animatedOffsetX.animateTo(
+                    targetValue = targetX,
+                    animationSpec = tween(300, easing = LinearEasing)
+                )
+
+                // Sau khi hoàn thành hiệu ứng, đặt lại vị trí và gọi callback
+                offsetX = 0f
+                offsetY = 0f
+                animatedOffsetX.snapTo(0f)
+                animatedOffsetY.snapTo(0f)
+                nextCardOpacity.snapTo(0f)
+                nextCardColorTransition.snapTo(0f)
+                swiped = false
+                isSuccessfulSwipe = false
                 onSwipe()
-                offset = Pair(0f, 0f)
-                isDragging = false
             }
         } else {
-            offset = Pair(0f, 0f)
+            // Nếu không đủ xa, thẻ sẽ trở về vị trí ban đầu với hiệu ứng tuyến tính
+            scope.launch {
+                // Sử dụng hiệu ứng tuyến tính cho cả hai trục
+                animatedOffsetX.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(150, easing = LinearEasing)
+                )
+                animatedOffsetY.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(150, easing = LinearEasing)
+                )
+                offsetX = 0f
+                offsetY = 0f
+                nextCardOpacity.snapTo(0f)
+                nextCardColorTransition.snapTo(0f)
+            }
         }
     }
 
+    // Cập nhật animatable khi offsetX, offsetY thay đổi
+    LaunchedEffect(offsetX, offsetY) {
+        if (isDragging && !swiped) {
+            animatedOffsetX.snapTo(offsetX)
+            animatedOffsetY.snapTo(offsetY)
+
+            // Cập nhật độ mờ của thẻ kế tiếp dựa trên mức độ kéo
+            val dragProgress = (abs(offsetX) + abs(offsetY)) / 200f
+            nextCardOpacity.snapTo(dragProgress.coerceIn(0f, 0.8f))
+
+            // Chỉ cập nhật transition màu sắc nếu đang tiến tới một swipe thành công
+            if (isSwipeGesture()) {
+                nextCardColorTransition.snapTo(dragProgress.coerceIn(0f, 0.8f))
+            }
+        }
+    }
+
+    // Stack effect - hiển thị các thẻ chồng lên nhau
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .aspectRatio(1.5f)) {
+
+        // Next card (behind current card)
+        if (nextFlashcard != null) {
+            // Tính toán màu chuyển đổi dựa trên giá trị animation
+            val progress = nextCardColorTransition.value
+
+            // Màu gốc và màu đích cho container
+            val startContainerColor = MaterialTheme.colorScheme.primaryContainer
+            val targetContainerColor = MaterialTheme.colorScheme.primary
+
+            // Màu gốc và màu đích cho nội dung (text)
+            val startContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            val targetContentColor = MaterialTheme.colorScheme.onPrimary
+
+            // Tính toán màu hiện tại dựa trên giá trị progress
+            val currentContainerColor = lerp(startContainerColor, targetContainerColor, progress)
+            val currentContentColor = lerp(startContentColor, targetContentColor, progress)
+
+            FlashcardContent(
+                flashcard = nextFlashcard,
+                isFlipped = false,
+                offsetX = 0f,
+                offsetY = 0f,
+                opacity = nextCardOpacity.value,
+                rotation = 0f,
+                elevation = 3.dp,
+                containerColor = currentContainerColor,
+                contentColor = currentContentColor,
+                onClick = {},
+                onDrag = { _, _ -> },
+                onDragStart = {},
+                onDragEnd = {},
+                onDragCancel = {},
+                modifier = Modifier.zIndex(0f)
+            )
+        }
+
+        // Current card (on top)
+        if (flashcard != null) {
+            FlashcardContent(
+                flashcard = flashcard,
+                isFlipped = isFlipped,
+                offsetX = animatedOffsetX.value,
+                offsetY = animatedOffsetY.value,
+                opacity = opacity,
+                rotation = rotation,
+                elevation = 6.dp,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                onClick = { if (!isDragging) onFlip() },
+                onDrag = { change, dragAmount ->
+                    change.consume()
+                    val adjustedDragX = dragAmount.x * dragSpeedMultiplier
+                    val adjustedDragY = dragAmount.y * dragSpeedMultiplier
+
+                    val newX = if (isFlipped) {
+                        offsetX - adjustedDragX
+                    } else {
+                        offsetX + adjustedDragX
+                    }
+                    offsetX = newX
+                    offsetY += adjustedDragY
+                },
+                onDragStart = { isDragging = true },
+                onDragEnd = {
+                    completeSwipe()
+                    isDragging = false
+                },
+                onDragCancel = {
+                    scope.launch {
+                        // Sử dụng hiệu ứng tuyến tính khi hủy kéo
+                        animatedOffsetX.animateTo(
+                            targetValue = 0f,
+                            animationSpec = tween(150, easing = LinearEasing)
+                        )
+                        animatedOffsetY.animateTo(
+                            targetValue = 0f,
+                            animationSpec = tween(150, easing = LinearEasing)
+                        )
+                        offsetX = 0f
+                        offsetY = 0f
+                        nextCardColorTransition.snapTo(0f)
+                    }
+                    isDragging = false
+                },
+                modifier = Modifier.zIndex(1f)
+            )
+        }
+    }
+}
+
+// Hàm để tính toán chuyển đổi giữa hai màu
+private fun lerp(start: Color, end: Color, fraction: Float): Color {
+    return Color(
+        red = lerp(start.red, end.red, fraction),
+        green = lerp(start.green, end.green, fraction),
+        blue = lerp(start.blue, end.blue, fraction),
+        alpha = lerp(start.alpha, end.alpha, fraction)
+    )
+}
+
+// Hàm hỗ trợ nội suy tuyến tính (linear interpolation)
+private fun lerp(start: Float, end: Float, fraction: Float): Float {
+    return start + (end - start) * fraction
+}
+
+@Composable
+private fun FlashcardContent(
+    flashcard: Flashcard,
+    isFlipped: Boolean,
+    offsetX: Float,
+    offsetY: Float,
+    opacity: Float,
+    rotation: Float,
+    elevation: Dp,
+    containerColor: Color,
+    contentColor: Color,
+    onClick: () -> Unit,
+    onDrag: (change: PointerInputChange, dragAmount: Offset) -> Unit,
+    onDragStart: () -> Unit,
+    onDragEnd: () -> Unit,
+    onDragCancel: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.5f)
-            .offset(x = offset.first.dp, y = offset.second.dp)
+            .offset(x = offsetX.dp, y = offsetY.dp)
             .graphicsLayer {
                 alpha = opacity
                 rotationY = rotation
@@ -67,41 +285,20 @@ fun FlashcardItem(
             }
             .pointerInput(isFlipped) {
                 detectDragGestures(
-                    onDragStart = { isDragging = true },
-                    onDragEnd = {
-                        completeSwipe()
-                        isDragging = false
-                    },
-                    onDragCancel = {
-                        offset = Pair(0f, 0f)
-                        isDragging = false
-                    },
-                    onDrag = { change, dragAmount ->
-                        // Thay đổi vị trí kéo
-                        change.consume()
-                        val (x, y) = offset
-
-                        // Áp dụng hệ số nhân để tùy chỉnh tốc độ kéo
-                        val adjustedDragX = dragAmount.x * dragSpeedMultiplier
-                        val adjustedDragY = dragAmount.y * dragSpeedMultiplier
-
-                        // Cập nhật vị trí kéo dựa trên hướng lật
-                        val newX = if (isFlipped) {
-                            x - adjustedDragX
-                        } else {
-                            x + adjustedDragX
-                        }
-                        offset = Pair(newX, y + adjustedDragY)
-                    }
+                    onDragStart = { onDragStart() },
+                    onDragEnd = { onDragEnd() },
+                    onDragCancel = { onDragCancel() },
+                    onDrag = onDrag
                 )
-            },
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            }
+            .then(modifier),
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = containerColor,
+            contentColor = contentColor
         ),
-        onClick = { onFlip() }
+        onClick = onClick
     ) {
         Box(
             modifier = Modifier
@@ -113,15 +310,15 @@ fun FlashcardItem(
             CardContent(
                 isVisible = !isFlipped,
                 rotation = rotation,
-                text = flashcard?.question ?: "",
+                text = flashcard.question,
                 isFrontSide = true
             )
 
             // Back side (Answer)
             CardContent(
                 isVisible = isFlipped,
-                rotation = 0f, // No need for additional rotation here
-                text = flashcard?.answer ?: "",
+                rotation = 0f,
+                text = flashcard.answer,
                 isFrontSide = false
             )
         }
