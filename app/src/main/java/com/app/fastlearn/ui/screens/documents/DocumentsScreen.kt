@@ -3,6 +3,9 @@ package com.app.fastlearn.ui.screens.documents
 import ExtendedFAB
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,6 +44,7 @@ import com.app.fastlearn.ui.components.EmptyScreen
 import com.app.fastlearn.ui.components.SearchTopBar
 import com.app.fastlearn.ui.components.SelectTopBar
 import com.app.fastlearn.ui.screens.flashcards.FlashcardsViewModel
+import com.app.fastlearn.util.CameraHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SuspiciousIndentation")
@@ -48,20 +53,43 @@ fun DocumentsScreen(
     modifier: Modifier = Modifier,
     documentsViewModel: DocumentsViewModel = hiltViewModel(),
     flashcardsViewModel: FlashcardsViewModel = hiltViewModel(),
-    onOpenCamera: () -> Unit,
+    onImagePreviewClick: (String) -> Unit,
     onImportFile: () -> Unit,
-    onProfileClick: () -> Unit = {},
+    onProfileClick: () -> Unit,
     onDocumentClick: (String) -> Unit
 ) {
-    // Collect state from the updated documentsViewModel
+    // Lấy context từ LocalContext
+    val context = LocalContext.current
+
+    // Khởi tạo CameraHelper
+    val cameraHelper = remember { CameraHelper(context) }
+
+    // Tạo launcher trong Composable
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) {
+                // Lấy URI ảnh từ CameraHelper
+                cameraHelper.getCurrentImageUri()?.let { uri ->
+                    // Xử lý ảnh đã chụp, ví dụ: tạo document mới từ ảnh
+                    Log.d("DocumentsScreen", "Image captured: $uri")
+                    // Chỗ này bạn có thể thêm logic xử lý ảnh như tạo document mới
+                    // rồi chuyển đến màn hình xem tài liệu
+                    onImagePreviewClick(uri.toString())
+                }
+            }
+        }
+    )
+
+    // Lấy trạng thái của ViewModel
     val uiState by documentsViewModel.uiState.collectAsState()
     var isSearchActive by remember { mutableStateOf(false) }
     var isGridView by remember { mutableStateOf(true) }
 
-    // Map to store flashcard counts
+    // Lưu trữ số lượng flashcard cho từng tài liệu
     val flashcardCounts = remember { mutableStateMapOf<String, Int>() }
 
-    // Load flashcard counts when documents change
+    // Tải số lượng flashcard khi tài liệu thay đổi
     LaunchedEffect(uiState.allDocuments) {
         uiState.allDocuments.forEach { document ->
             flashcardsViewModel.getFlashcardCountForDocument(document.docId) { count ->
@@ -251,7 +279,9 @@ fun DocumentsScreen(
         // FAB thêm tài liệu, chụp ảnh, nhập file
         if (!uiState.isSelectionMode) {
             ExtendedFAB(
-                onCameraClick = onOpenCamera,
+                onCameraClick = {
+                    cameraHelper.openCamera(takePictureLauncher)
+                },
                 onFileClick = onImportFile,
             )
         }

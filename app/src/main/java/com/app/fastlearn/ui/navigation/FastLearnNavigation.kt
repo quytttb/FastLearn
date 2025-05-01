@@ -1,5 +1,6 @@
 package com.app.fastlearn.ui.navigation
 
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Description
@@ -7,10 +8,10 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.app.fastlearn.ui.navigation.DestinationsArgs.IMAGE_NAME
-import com.app.fastlearn.ui.navigation.DestinationsArgs.RECOGNIZED_TEXT_ID
 import com.app.fastlearn.R
 import com.app.fastlearn.ui.navigation.DestinationsArgs.DOCUMENT_ID
+import com.app.fastlearn.ui.navigation.DestinationsArgs.IMAGE_URI
+import com.app.fastlearn.ui.navigation.DestinationsArgs.RECOGNIZED_TEXT_ID
 
 /**
  * Định nghĩa [Screens]
@@ -19,13 +20,12 @@ import com.app.fastlearn.ui.navigation.DestinationsArgs.DOCUMENT_ID
 private object Screens {
 
     const val DOCUMENTS = "documents"
-    const val CAPTURE = "capture"
     const val FLASHCARDS = "flashcards"
     const val STUDY = "study"
     const val STUDY_LIST = "studyList"
     const val IMAGE_PREVIEW = "imagePreview"
     const val OCR = "ocr"
-
+    const val PROFILE = "profile"
     const val DOCUMENT_DETAIL = "documentDetail"
 }
 
@@ -34,7 +34,7 @@ private object Screens {
  */
 
 object DestinationsArgs {
-    const val IMAGE_NAME = "imageName"
+    const val IMAGE_URI = "imageUri"
     const val RECOGNIZED_TEXT_ID = "recognizedTextId"
     const val DOCUMENT_ID = "documentId"
 }
@@ -44,13 +44,13 @@ object DestinationsArgs {
  */
 object Destinations {
     const val DOCUMENTS_ROUTE = Screens.DOCUMENTS
-    const val CAPTURE_ROUTE = Screens.CAPTURE
     const val FLASHCARDS_ROUTE = Screens.FLASHCARDS
     const val STUDY_LIST_ROUTE = Screens.STUDY_LIST
-    const val IMAGE_PREVIEW_ROUTE = "${Screens.IMAGE_PREVIEW}/{$IMAGE_NAME}"
+    const val IMAGE_PREVIEW_ROUTE = "${Screens.IMAGE_PREVIEW}/{$IMAGE_URI}"
     const val OCR_ROUTE = "${Screens.OCR}/{$RECOGNIZED_TEXT_ID}"
     const val DOCUMENT_DETAIL_ROUTE = "${Screens.DOCUMENT_DETAIL}/{$DOCUMENT_ID}"
     const val STUDY_ROUTE = "${Screens.STUDY}/{${DOCUMENT_ID}}"
+    const val PROFILE_ROUTE = Screens.PROFILE
 }
 
 /**
@@ -106,9 +106,6 @@ class NavigationActions(private val navController: NavHostController) {
         navigateWithDefaultOptions(route)
     }
 
-    fun navigateToCapture() {
-        navigateWithDefaultOptions(Destinations.CAPTURE_ROUTE)
-    }
 
     fun navigateToFlashcards() {
         navigateWithDefaultOptions(Destinations.FLASHCARDS_ROUTE)
@@ -123,14 +120,12 @@ class NavigationActions(private val navController: NavHostController) {
         navigateWithDefaultOptions(route)
     }
 
-    fun navigateToImagePreview(imageName: String) {
-        val route = "${Screens.IMAGE_PREVIEW}/$imageName"
-        navController.navigate(route) {
-            // Không sử dụng popUpTo đến startDestination cho ImagePreview
-            // vì chúng ta muốn quay lại CaptureScreen khi nhấn back
-            launchSingleTop = true
-        }
+    fun navigateToImagePreview(imageUri: String) {
+        val encodedUri = Uri.encode(imageUri)
+        val route = "${Screens.IMAGE_PREVIEW}/$encodedUri"
+        navigateWithDefaultOptions(route)
     }
+
 
     fun navigateToOCR(recognizedTextId: String) {
         val route = "${Screens.OCR}/$recognizedTextId"
@@ -151,7 +146,7 @@ class NavigationActions(private val navController: NavHostController) {
         }
     }
 
-    fun navigateDiscardFromOCR() {
+/*    fun navigateDiscardFromOCR() {
         navController.navigate(Destinations.CAPTURE_ROUTE) {
             // Loại bỏ tất cả các màn hình đến màn hình Chụp ảnh
             popUpTo(Destinations.CAPTURE_ROUTE) {
@@ -159,6 +154,10 @@ class NavigationActions(private val navController: NavHostController) {
             }
             launchSingleTop = true
         }
+    }*/
+
+    fun navigateToProfile() {
+        navigateWithDefaultOptions(Destinations.PROFILE_ROUTE)
     }
 
 

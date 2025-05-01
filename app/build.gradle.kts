@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.secretsGradlePlugin)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -106,6 +107,25 @@ dependencies {
 
     // Accompanist
     implementation (libs.accompanist.systemuicontroller)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+
+    // Firebase Authentication
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
+    // Firebase Firestore
+    implementation(libs.firebase.firestore)
+
+    /*
+    // Firebase ML Kit
+    implementation(libs.firebase.ml.vision.ktx)
+    */
+    // Firebase Analytics
+    implementation(libs.firebase.analytics)
 
 
     // Testing

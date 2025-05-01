@@ -1,10 +1,12 @@
 package com.app.fastlearn.ui.navigation
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -13,16 +15,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.app.fastlearn.ui.screens.capture.CaptureScreen
 import com.app.fastlearn.ui.screens.capture.ImagePreviewScreen
 import com.app.fastlearn.ui.screens.documents.DocumentsScreen
 import com.app.fastlearn.ui.screens.flashcards.FlashcardsScreen
 import com.app.fastlearn.ui.screens.study.StudyScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.fastlearn.ui.screens.documents.DocumentDetailScreen
+import com.app.fastlearn.ui.screens.documents.DocumentsViewModel
 import com.app.fastlearn.ui.screens.documents.OCRScreen
+import com.app.fastlearn.ui.screens.profile.ProfileScreen
 import com.app.fastlearn.ui.screens.study.StudyListScreen
+import kotlin.toString
 
 @Composable
 fun FastLearnNavGraph(
@@ -45,22 +51,17 @@ fun FastLearnNavGraph(
         composable(Destinations.DOCUMENTS_ROUTE) {
             DocumentsScreen(
                 modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
-                onOpenCamera = { navActions.navigateToCapture() },
+                onImagePreviewClick = { imageUri ->
+                    navActions.navigateToImagePreview(imageUri)
+                },
                 onImportFile = { /*Todo: Xử lý nhập file văn bản*/ },
+                onProfileClick = { navActions.navigateToProfile() },
                 onDocumentClick = { documentId ->
                     navActions.navigateToDocumentDetail(documentId)
                 },
             )
         }
 
-        composable(Destinations.CAPTURE_ROUTE) {
-            CaptureScreen(
-                modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
-                onImageCaptured = { imageName ->
-                    navActions.navigateToImagePreview(imageName)
-                }
-            )
-        }
 
         composable(Destinations.FLASHCARDS_ROUTE) {
             FlashcardsScreen(
@@ -68,7 +69,6 @@ fun FastLearnNavGraph(
             )
         }
 
-        // New StudyListScreen composable
         composable(Destinations.STUDY_LIST_ROUTE) {
             StudyListScreen(
                 modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
@@ -81,12 +81,12 @@ fun FastLearnNavGraph(
         composable(
             Destinations.IMAGE_PREVIEW_ROUTE,
             arguments = listOf(
-                navArgument(DestinationsArgs.IMAGE_NAME) { type = NavType.StringType }
+                navArgument(DestinationsArgs.IMAGE_URI) { type = NavType.StringType }
             )
         ) { entry ->
             ImagePreviewScreen(
                 modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
-                imageName = entry.arguments?.getString(DestinationsArgs.IMAGE_NAME)!!,
+                imageUri = entry.arguments?.getString(DestinationsArgs.IMAGE_URI)!!,
                 onConfirmNavigate = { recognizedText ->
                     navActions.navigateToOCR(recognizedText)
                 },
@@ -103,7 +103,7 @@ fun FastLearnNavGraph(
             OCRScreen(
                 modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
                 onConfirmNavigate = { navActions.navigateComfirmFromOCR() },
-                onDiscardNavigate = { navActions.navigateDiscardFromOCR() },
+                onDiscardNavigate = { TODO("Gọi Intent mở Camera") },
             )
         }
 
@@ -133,6 +133,14 @@ fun FastLearnNavGraph(
                     //Todo: Xử lý gửi tiến trình sang profile
                 },
                 onNavigateBack = { navActions.navigateToStudyList() },
+            )
+        }
+
+        composable(Destinations.PROFILE_ROUTE) {
+            ProfileScreen(
+                modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
+                onNavigateToStatistics = { /* Will implement later */ },
+                onNavigateToHistory = { /* Will implement later */ }
             )
         }
     }

@@ -1,12 +1,20 @@
 package com.app.fastlearn.ui.screens.documents
 
+import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.fastlearn.BuildConfig
 import com.app.fastlearn.data.repository.DocumentRepository
 import com.app.fastlearn.domain.model.Document
 import com.app.fastlearn.domain.usecase.CreateFlashcardsUseCase
+import com.app.fastlearn.util.CameraHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -16,6 +24,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
@@ -25,7 +36,7 @@ class DocumentsViewModel @Inject constructor(
     private val createFlashcardsUseCase: CreateFlashcardsUseCase
 ) : ViewModel() {
 
-    // Unified UI state for Documents screen
+    // Trạng thái UI hợp nhất cho Documents screen
     data class DocumentsUiState(
         val allDocuments: List<Document> = emptyList(),
         val searchQuery: String = "",
@@ -37,21 +48,21 @@ class DocumentsViewModel @Inject constructor(
         val selectedDocuments: Set<String> = emptySet()
     )
 
-    // Private MutableStateFlow to hold UI state
+    // Mutable stateflow để giữ trạng thái UI
     private val _uiState = MutableStateFlow(DocumentsUiState())
 
-    // Public immutable StateFlow for UI
+    // Immutable StateFlow cho UI
     val uiState: StateFlow<DocumentsUiState> = _uiState.asStateFlow()
 
-    // Search debounce settings
+    // Thời gian debounce cho tìm kiếm, để tránh tìm kiếm quá nhanh
     private val searchDebounceTimeMillis = 300L
     private var searchJob: Job? = null
 
     init {
-        // Load initial documents
+        // Tải tài liệu ngay khi ViewModel được khởi tạo
         loadDocuments()
 
-        // Setup search query flow
+        // Thiết lập luồng truy vấn tìm kiếm
         viewModelScope.launch {
             _uiState
                 .debounce(searchDebounceTimeMillis)
@@ -95,7 +106,7 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Update search query and trigger search
+    // Cập nhật truy vấn tìm kiếm
     fun updateSearchQuery(query: String) {
         if (query != _uiState.value.searchQuery) {
             _uiState.update { it.copy(
@@ -105,7 +116,7 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Perform search operation
+    // Thực hiện tìm kiếm tài liệu
     private fun performSearch(query: String) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
@@ -137,7 +148,7 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Clear search
+    // Xóa truy vấn tìm kiếm
     fun clearSearch() {
         _uiState.update { it.copy(
             searchQuery = "",
@@ -147,7 +158,7 @@ class DocumentsViewModel @Inject constructor(
         )}
     }
 
-    // Toggle selection mode
+    // Bắt đầu chế độ chọn tài liệu
     fun toggleSelectionMode() {
         _uiState.update { state ->
             state.copy(
@@ -157,7 +168,7 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Toggle document selection
+    // Chọn tài liệu
     fun toggleDocumentSelection(docId: String) {
         _uiState.update { state ->
             val currentSelection = state.selectedDocuments.toMutableSet()
@@ -170,30 +181,30 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Clear selection
+    // Xóa tất cả lựa chọn
     fun clearSelection() {
         _uiState.update { it.copy(selectedDocuments = emptySet()) }
     }
 
-    // Select all documents
+    // Chọn tất cả tài liệu
     fun selectAllDocuments() {
         _uiState.update { state ->
             state.copy(selectedDocuments = state.allDocuments.map { it.docId }.toSet())
         }
     }
 
-    // Get selected documents as objects
+    // Lấy các tài liệu được chọn làm đối tượng
     fun getSelectedDocumentsObjects(): List<Document> {
         val state = _uiState.value
         return state.allDocuments.filter { state.selectedDocuments.contains(it.docId) }
     }
 
-    // Get document by ID
+    // Lấy tài liệu theo ID
     fun getDocumentById(documentId: String): Document? {
         return _uiState.value.allDocuments.find { it.docId == documentId }
     }
 
-    // Create flashcards from document
+    // Tạo flashcard từ tài liệu
     fun createFlashcard(
         document: Document?,
         onSuccess: () -> Unit = {},
@@ -222,7 +233,7 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Create flashcards from selected documents
+    // Tạo flashcards từ tài liệu đã chọn
     fun createFlashcardsFromSelected(
         onSuccess: () -> Unit = {},
         onError: (Exception) -> Unit = {}
@@ -242,7 +253,7 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Delete document
+    // Xóa tài liệu
     fun deleteDocument(document: Document) {
         viewModelScope.launch {
             documentRepository.deleteDocument(document)
@@ -250,7 +261,7 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Delete selected documents
+    // Xóa tài liệu đã chọn
     fun deleteSelectedDocuments() {
         viewModelScope.launch {
             val docsToDelete = getSelectedDocumentsObjects()
@@ -263,7 +274,7 @@ class DocumentsViewModel @Inject constructor(
         }
     }
 
-    // Delete all documents
+    // Xóa tất cả tài liệu
     fun deleteAllDocuments() {
         viewModelScope.launch {
             _uiState.value.allDocuments.forEach { documentRepository.deleteDocument(it) }

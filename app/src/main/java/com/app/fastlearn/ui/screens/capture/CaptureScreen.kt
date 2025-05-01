@@ -1,3 +1,4 @@
+/*
 package com.app.fastlearn.ui.screens.capture
 
 import android.Manifest
@@ -174,4 +175,4 @@ fun CameraPreview(
             Text(text = stringResource(id = R.string.take_photo))
         }
     }
-}
+}*/

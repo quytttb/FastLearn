@@ -1,3 +1,4 @@
+/*
 package com.app.fastlearn.ui.screens.capture
 
 import android.app.Activity
@@ -26,6 +27,8 @@ import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
+import android.graphics.Bitmap
+import java.io.FileOutputStream
 
 @HiltViewModel
 class CaptureViewModel @Inject constructor() : ViewModel() {
@@ -119,4 +122,27 @@ class CaptureViewModel @Inject constructor() : ViewModel() {
         super.onCleared()
         _cameraExecutor.shutdown()
     }
-}
+
+    // Lưu bitmap vào file
+    fun saveBitmapToFile(context: Context, bitmap: Bitmap, onFileSaved: (File) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val name = SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
+                    .format(System.currentTimeMillis())
+                val outputDirectory = context.cacheDir
+                val photoFile = File(outputDirectory, "$name.jpg")
+
+                FileOutputStream(photoFile).use { outputStream ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                    outputStream.flush()
+                }
+
+                launch(Dispatchers.Main) {
+                    onFileSaved(photoFile)
+                }
+            } catch (e: Exception) {
+                Log.e("CaptureViewModel", "Error saving bitmap to file", e)
+            }
+        }
+    }
+}*/

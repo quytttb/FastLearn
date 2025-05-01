@@ -112,6 +112,9 @@ fun StudyScreen(
                                 if (isAnswerRevealed) {
                                     if (currentCardIndex == flashcards.size - 1) {
                                         // Todo: Gửi tiến trình học tập khi hoàn thành
+                                        Log.d("StudyScreen", "Sending progress for document ID: ${viewModel.currentDocumentId}")
+                                        //Log danh sách toàn bộ progress
+                                        Log.d("StudyScreen", "Study progress: $studyProgress")
                                         onSendProgress(viewModel.currentDocumentId)
                                     } else {
                                         viewModel.goToNextCard()

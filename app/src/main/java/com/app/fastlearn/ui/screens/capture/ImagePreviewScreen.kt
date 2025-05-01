@@ -17,28 +17,27 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.fastlearn.R
 import coil3.compose.AsyncImage
-import java.io.File
+import androidx.core.net.toUri
 
 @Composable
 fun ImagePreviewScreen(
     modifier: Modifier = Modifier,
-    imageName: String,
+    imageUri: String,
     onConfirmNavigate: (String) -> Unit,
     onDiscardNavigate: () -> Unit,
     viewModel: ImagePreviewViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 
-    // Thiết lập file ảnh khi màn hình được tải
-    LaunchedEffect(imageName) {
-        val capturedImageFile = File(context.cacheDir, imageName)
-        viewModel.setImageFile(capturedImageFile)
+    // Thiết lập URI ảnh khi màn hình được tải
+    LaunchedEffect(imageUri) {
+        viewModel.setImageUri(imageUri.toUri())
     }
 
     Box(modifier = modifier.fillMaxSize()) {
         // Hiển thị ảnh trong Surface với định dạng giống CaptureScreen
-        val capturedImageFile = viewModel.capturedImageFile.collectAsState().value
-        capturedImageFile?.let {
+        val capturedImageUri = viewModel.capturedImageUri.collectAsState().value
+        capturedImageUri?.let {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -81,7 +80,7 @@ fun ImagePreviewScreen(
             // Nút xác nhận
             FloatingActionButton(
                 onClick = {
-                    viewModel.confirmImage { recognizedText ->
+                    viewModel.confirmImage(context) { recognizedText ->
                         onConfirmNavigate(recognizedText)
                     }
                 },

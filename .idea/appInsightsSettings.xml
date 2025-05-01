@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.app.fastlearn" />
+                  <option name="mobileSdkAppId" value="1:38066187602:android:3e367d311b558f114dde8b" />
+                  <option name="projectId" value="fast-learn-q2402" />
+                  <option name="projectNumber" value="38066187602" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

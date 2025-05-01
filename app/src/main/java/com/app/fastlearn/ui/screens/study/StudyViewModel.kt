@@ -135,7 +135,7 @@ class StudyViewModel @Inject constructor(
 
         // Create study progress entry
         val timeTaken =
-            java.time.Duration.between(_startTime.value, LocalDateTime.now()).toMinutes().toInt()
+            java.time.Duration.between(_startTime.value, LocalDateTime.now()).toMillis().toInt()
 
         val progress = Progress(
             progressId = "Prog_${

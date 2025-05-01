@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "38066187602",
+    "project_id": "fast-learn-q2402",
+    "storage_bucket": "fast-learn-q2402.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:38066187602:android:3e367d311b558f114dde8b",
+        "android_client_info": {
+          "package_name": "com.app.fastlearn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi599rApoFZTLzJJEPPwDQAc_aS97ePPs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

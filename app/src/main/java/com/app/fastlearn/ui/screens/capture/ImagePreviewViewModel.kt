@@ -1,61 +1,75 @@
 package com.app.fastlearn.ui.screens.capture
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.fastlearn.domain.model.RecognizedText
-import com.app.fastlearn.domain.repository.RecognizedTextRepository
-import com.app.fastlearn.domain.service.OCRService
+import com.app.fastlearn.domain.usecase.OCRUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class ImagePreviewViewModel @Inject constructor(
-    private val ocrService: OCRService,
-    private val recognizedTextRepository: RecognizedTextRepository
+    private val ocrUseCase: OCRUseCase
 ) : ViewModel() {
-    private val _capturedImageFile = MutableStateFlow<File?>(null)
-    val capturedImageFile: StateFlow<File?> = _capturedImageFile.asStateFlow()
+    private val _capturedImageUri = MutableStateFlow<Uri?>(null)
+    val capturedImageUri: StateFlow<Uri?> = _capturedImageUri.asStateFlow()
 
-    // Thiết lập file ảnh đã chụp
-    fun setImageFile(file: File) {
-        _capturedImageFile.value = file
+    // Thiết lập URI ảnh đã chụp
+    fun setImageUri(uri: Uri) {
+        _capturedImageUri.value = uri
     }
 
     // Xóa ảnh
     fun discardImage() {
-        _capturedImageFile.value?.delete()
-        _capturedImageFile.value = null
+        _capturedImageUri.value = null
     }
 
     // Xác nhận ảnh và thực hiện OCR
-    fun confirmImage(onTextRecognized: (String) -> Unit) {
-        _capturedImageFile.value?.let { file ->
-            viewModelScope.launch {
-                // OCR và lưu trữ văn bản đã nhận diện
-                val recognizedText = ocrService.recognizeTextFromImage(file)
-                recognizedText?.let {
-                    // Lưu trữ văn bản đã nhận diện vào kho dữ liệu trung gian
-                    val id = recognizedTextRepository.saveRecognizedText(
-                        RecognizedText(
-                            id = file.nameWithoutExtension,
-                            text = it
-                        )
-                    )
-                    onTextRecognized(id)
-                    // Đặt log để kiểm tra
-//                    Log.d(
-//                        "ImagePreviewViewModel",
-//                        "Recognized text saved with ID: $id"
-//                    )
-                    // Xóa file ảnh sau khi đã nhận diện
-//                    file.delete()
+    fun confirmImage(context: Context, onTextRecognized: (String) -> Unit) {
+        _capturedImageUri.value?.let { uri ->
+            viewModelScope.launch(Dispatchers.IO) {
+                // Chuyển đổi URI thành File
+                val file = uriToFile(context, uri)
+
+                file?.let {
+                    // Sử dụng OCRUseCase để xử lý OCR
+                    val id = ocrUseCase.executeOCR(it)
+                    id?.let { textId ->
+                        launch(Dispatchers.Main) {
+                            onTextRecognized(textId)
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    // Chuyển đổi URI thành File
+    private fun uriToFile(context: Context, uri: Uri): File? {
+        return try {
+            val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+            inputStream?.use { stream ->
+                val bitmap = BitmapFactory.decodeStream(stream)
+                val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
+                FileOutputStream(file).use { outputStream ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                }
+                file
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 }

@@ -85,7 +85,8 @@ class ProgressRepositoryImpl @Inject constructor(
             val difficultCards = progressByFlashcard
                 .mapValues { (_, progressList) ->
                     val totalAttempts = progressList.size
-                    val incorrectAttempts = progressList.count { it.status == ProgressStatus.INCORRECT.value }
+                    val incorrectAttempts =
+                        progressList.count { it.status == ProgressStatus.INCORRECT.value }
                     if (totalAttempts > 0) incorrectAttempts.toFloat() / totalAttempts else 0f
                 }
                 .entries

@@ -54,9 +54,17 @@
     <string name="no_search_results">Không tìm thấy tài liệu nào phù hợp</string>
     <string name="try_different_search">Thử sử dụng từ khóa khác hoặc kiểm tra lỗi chính tả</string>
     <string name="no_documents_for_flashcards">Không có tài liệu nào để tạo flashcard</string>
-    <!-- Delete Document Dialog Strings -->
     <string name="delete_documents">Xóa Tài liệu</string>
     <string name="delete_document_confirmation">Bạn có muốn xóa tài liệu này không?</string>
     <string name="delete_multiple_documents_confirmation">Bạn có muốn xóa %d tài liệu này không?</string>
     <string name="delete">Xóa</string>
+    <string name="study_statistics">Thống kê học tập</string>
+    <string name="total_cards_studied">Số thẻ đã học</string>
+    <string name="correct_answers">Số câu đúng</string>
+    <string name="accuracy_rate">Tỉ lệ chính xác</string>
+    <string name="total_study_time">Thời gian học</string>
+    <string name="last_study_date">Ngày học gần nhất</string>
+    <string name="study_history">Lịch sử học tập</string>
+    <string name="no_study_history">Chưa có lịch sử học tập</string>
+    <string name="error_loading_profile">Không thể tải thông tin người dùng</string>
 </resources>
