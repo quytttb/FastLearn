@@ -37,8 +37,8 @@ fun BottomNavigationBar(
                     onClick = {
                         when (screen) {
                             Navigation.Documents -> navigationActions.navigateToDocuments()
-                            Navigation.Flashcards -> navigationActions.navigateToFlashcards()
-                            Navigation.Study -> navigationActions.navigateToStudyList()
+                            Navigation.Create -> navigationActions.navigateToCreate()
+                            Navigation.Statistics -> navigationActions.navigateToStatistics()
                         }
                     }
                 )

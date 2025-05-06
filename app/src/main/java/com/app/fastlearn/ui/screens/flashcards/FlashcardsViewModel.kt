@@ -55,9 +55,6 @@ class FlashcardsViewModel @Inject constructor(
     }
 
     init {
-//        if (documentId.isNotEmpty()) {
-//            loadFlashcards(documentId)
-//        }
         loadAllFlashcards()
     }
 

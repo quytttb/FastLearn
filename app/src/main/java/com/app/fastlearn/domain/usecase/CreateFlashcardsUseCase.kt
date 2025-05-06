@@ -26,7 +26,6 @@ class CreateFlashcardsUseCase @Inject constructor(
             // Gọi API Gemini để tạo flashcards
             val flashcardsResult = geminiApi.generateFlashcards(
                 content = document.content,
-                category = document.category,
                 docId = document.docId,
                 apiKey = apiKey
             )

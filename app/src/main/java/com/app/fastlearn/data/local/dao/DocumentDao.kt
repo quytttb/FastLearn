@@ -12,8 +12,8 @@ interface DocumentDao {
     @Query("SELECT * FROM documents WHERE docId = :docId")
     suspend fun getDocumentById(docId: String): DocumentEntity?
 
-    @Query("SELECT * FROM documents WHERE category = :category ORDER BY createdDate DESC")
-    fun getDocumentsByCategory(category: String): Flow<List<DocumentEntity>>
+    @Query("SELECT * FROM documents WHERE categoryId = :categoryId ORDER BY createdDate DESC")
+    fun getDocumentsByCategory(categoryId: String): Flow<List<DocumentEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDocument(document: DocumentEntity)

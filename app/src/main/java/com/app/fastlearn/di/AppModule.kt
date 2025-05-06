@@ -23,5 +23,5 @@ object AppModule {
     fun provideOCRService(@ApplicationContext context: Context): OCRService {
         return OCRService(context)
     }
-    // You can add other app-level dependencies here (e.g., SharedPreferences)
+    // Có thể thêm các app-level dependencies khác tại đây (ví dụ: SharedPreferences)
 }

@@ -1,7 +1,6 @@
 package com.app.fastlearn.di
 
 import com.app.fastlearn.data.repository.*
-import com.app.fastlearn.domain.repository.*
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -21,6 +20,12 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindCategoryRepository(
+        categoryRepositoryImpl: CategoryRepositoryImpl
+    ): CategoryRepository
+
+    @Binds
+    @Singleton
     abstract fun bindFlashcardRepository(
         flashcardRepositoryImpl: FlashcardRepositoryImpl
     ): FlashcardRepository
@@ -31,11 +36,4 @@ abstract class RepositoryModule {
         progressRepositoryImpl: ProgressRepositoryImpl
     ): ProgressRepository
 
-    companion object {
-        @Provides
-        @Singleton
-        fun provideRecognizedTextRepository(): RecognizedTextRepository {
-            return RecognizedTextRepository()
-        }
-    }
 }

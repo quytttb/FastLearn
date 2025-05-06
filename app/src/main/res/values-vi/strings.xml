@@ -1,30 +1,55 @@
 <resources>
+    <!-- App General -->
     <string name="app_name">Học Nhanh</string>
-    <string name="extracted_text_label">Văn bản đã trích xuất</string>
     <string name="discard">Hủy bỏ</string>
     <string name="confirm">Xác nhận</string>
+    <string name="delete">Xóa</string>
+    <string name="select">Chọn</string>
+    <string name="select_all">Chọn tất cả</string>
+    <string name="select_items">Chọn mục</string>
+    <string name="selected_items_count">Đã chọn: %1$d</string>
+    <string name="previous">Trước</string>
+    <string name="finish">Hoàn thành</string>
+
+    <!-- Navigation -->
+    <string name="navigate_back">Quay về</string>
     <string name="flashcards_screen_title">Thẻ ghi nhớ</string>
     <string name="documents_screen_title">Tài liệu</string>
     <string name="study_screen_title">Học tập</string>
     <string name="capture_screen_title">Quét tài liệu</string>
     <string name="image_preview_screen_title">Xem trước ảnh</string>
     <string name="ocr_screen_title">Nhận dạng văn bản</string>
-    <string name="camera">Máy ảnh</string>
-    <string name="file">Tệp</string>
-    <string name="take_photo">Chụp ảnh</string>
-    <string name="camera_permission_denied">Quyền truy cập máy ảnh bị từ chối</string>
-    <string name="captured_image_description">Ảnh đã chụp</string>
-    <string name="title_label">"Tiêu đề"</string>
+    <string name="create_screen_title">Tạo</string>
+    <string name="select_action">Chọn hành động</string>
+    <string name="view_document">Xem tài liệu</string>
+    <string name="view_document_description">Xem đầy đủ tài liệu</string>
+
+    <!-- Document Screen -->
+    <string name="add_document">Thêm tài liệu</string>
     <string name="document_saved">Đã lưu tài liệu</string>
-    <string name="navigate_back">Quay về</string>
-    <string name="clear_search">Xóa tìm kiếm</string>
-    <string name="search_documents">Tìm tài liệu</string>
-    <string name="search">Tìm kiếm</string>
+    <string name="title_label">Tiêu đề</string>
+    <string name="delete_documents">Xóa Tài liệu</string>
+    <string name="delete_document_confirmation">Bạn có muốn xóa tài liệu này không?</string>
+    <string name="delete_multiple_documents_confirmation">Bạn có muốn xóa %d tài liệu này không?</string>
     <string name="toggle_view">Chuyển bố cục danh sách</string>
-    <string name="profile">Hồ sơ</string>
-    <string name="empty_title">Chưa có mục nào</string>
-    <string name="empty_content">Bấm vào nút + để tạo mục mới</string>
-    <string name="flashcards">%d thẻ</string>
+    <string name="document_options">Tùy chọn tài liệu</string>
+    <string name="loading_document">Đang tải tài liệu…</string>
+
+    <!-- OCR Screen -->
+    <string name="processing_image">Đang xử lý ảnh…</string>
+    <string name="error_processing_image">Lỗi xử lý ảnh</string>
+    <string name="try_again">Thử lại</string>
+    <string name="extracted_text_label">Văn bản đã trích xuất</string>
+    <string name="no_text_detected">Không phát hiện văn bản</string>
+    <string name="try_another_image">Vui lòng thử lại với ảnh khác có chứa văn bản</string>
+    <string name="required_field">Trường này là bắt buộc</string>
+    <string name="category_label">Danh mục</string>
+    <string name="select_category">Chọn danh mục</string>
+    <string name="category_required">Vui lòng chọn danh mục</string>
+
+    <!-- Flashcards -->
+    <string name="flashcard_count">%1$d thẻ</string>
+    <string name="no_flashcards">Không có thẻ nào</string>
     <string name="add_new_flashcard">Thêm thẻ ghi nhớ mới</string>
     <string name="shuffle_flashcards">Xáo trộn thẻ ghi nhớ</string>
     <string name="tab_flashcards">Thẻ ghi nhớ</string>
@@ -35,29 +60,25 @@
     <string name="flashcards_created_success">Đã tạo thẻ ghi nhớ thành công</string>
     <string name="flashcards_creation_failed">Không thể tạo thẻ ghi nhớ</string>
     <string name="creating_flashcards">Đang tạo thẻ ghi nhớ…</string>
+    <string name="no_documents_for_flashcards">Không có tài liệu nào để tạo flashcard</string>
+    <string name="view_flashcards">Xem thẻ ghi nhớ</string>
+    <string name="generate_flashcards_prompt">Tạo thẻ ghi nhớ từ tài liệu này</string>
+    <string name="content_not_suitable_flashcards">Nội dung quá ngắn để tạo thẻ ghi nhớ</string>
+
+    <!-- Study Screen -->
     <string name="study_flashcards">Học thẻ ghi nhớ</string>
+    <string name="study_document_description">Học thẻ ghi nhớ của tài liệu này</string>
     <string name="select_answer">Chọn đáp án</string>
     <string name="check_answer">Kiểm tra đáp án</string>
     <string name="next_card">Thẻ tiếp theo</string>
     <string name="previous_card">Thẻ trước</string>
-    <string name="previous">Trước</string>
-    <string name="finish">Hoàn thành</string>
     <string name="start_quiz">Bắt đầu kiểm tra</string>
     <string name="study_completed">Học xong!</string>
     <string name="correct_answers_count">Đúng: %1$d/%2$d</string>
-    <string name="add_document">Thêm tài liệu</string>
-    <string name="select">Chọn</string>
-    <string name="select_all">Chọn tất cả</string>
-    <string name="select_items">Chọn mục</string>
-    <string name="selected_items_count">Đã chọn: %1$d</string>
-    <string name="search_results_for">Kết quả tìm kiếm cho \"%s\"</string>
-    <string name="no_search_results">Không tìm thấy tài liệu nào phù hợp</string>
-    <string name="try_different_search">Thử sử dụng từ khóa khác hoặc kiểm tra lỗi chính tả</string>
-    <string name="no_documents_for_flashcards">Không có tài liệu nào để tạo flashcard</string>
-    <string name="delete_documents">Xóa Tài liệu</string>
-    <string name="delete_document_confirmation">Bạn có muốn xóa tài liệu này không?</string>
-    <string name="delete_multiple_documents_confirmation">Bạn có muốn xóa %d tài liệu này không?</string>
-    <string name="delete">Xóa</string>
+
+    <!-- Profile and Statistics -->
+    <string name="profile">Hồ sơ</string>
+    <string name="statistics_title">Thống kê</string>
     <string name="study_statistics">Thống kê học tập</string>
     <string name="total_cards_studied">Số thẻ đã học</string>
     <string name="correct_answers">Số câu đúng</string>
@@ -67,4 +88,32 @@
     <string name="study_history">Lịch sử học tập</string>
     <string name="no_study_history">Chưa có lịch sử học tập</string>
     <string name="error_loading_profile">Không thể tải thông tin người dùng</string>
+
+    <!-- Camera & Image -->
+    <string name="camera">Máy ảnh</string>
+    <string name="file">Tệp</string>
+    <string name="take_photo">Chụp ảnh</string>
+    <string name="camera_permission_denied">Quyền truy cập máy ảnh bị từ chối</string>
+    <string name="captured_image_description">Ảnh đã chụp</string>
+
+    <!-- Search -->
+    <string name="search">Tìm kiếm</string>
+    <string name="search_documents">Tìm tài liệu</string>
+    <string name="clear_search">Xóa tìm kiếm</string>
+    <string name="search_results_for">Kết quả tìm kiếm cho \"%s\"</string>
+    <string name="no_search_results">Không tìm thấy tài liệu nào phù hợp</string>
+    <string name="try_different_search">Thử sử dụng từ khóa khác hoặc kiểm tra lỗi chính tả</string>
+
+    <!-- Empty States -->
+    <string name="empty_title">Chưa có mục nào</string>
+    <string name="empty_content">Bấm vào nút + để tạo mục mới</string>
+
+    <!-- Summary -->
+    <string name="summary">Tóm tắt tài liệu</string>
+    <string name="no_summary">Không có tóm tắt</string>
+    <string name="generate_summary">Tạo tóm tắt</string>
+    <string name="generate_summary_prompt">Tạo tóm tắt AI của tài liệu này để dễ hình dung tài liệu</string>
+    <string name="content_too_short">Tài liệu ngắn quá. Hãy thêm nội dung (Tối thiểu 50 từ) để tóm tắt.</string>
+    <string name="cannot_summarize">Không thể tạo tóm tắt</string>
+    <string name="generating_summary">Đang tạo tóm tắt…</string>
 </resources>

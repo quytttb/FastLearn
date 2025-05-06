@@ -103,7 +103,7 @@ fun DocumentListItem(
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ) {
                             Text(
-                                text = stringResource(R.string.flashcards, flashcardCount),
+                                text = stringResource(R.string.flashcard_count, flashcardCount),
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }

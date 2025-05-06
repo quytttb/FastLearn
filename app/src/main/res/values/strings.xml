@@ -1,63 +1,84 @@
 <resources>
+    <!-- App General -->
     <string name="app_name">FastLearn</string>
-    <string name="extracted_text_label">Extracted Text</string>
     <string name="discard">Discard</string>
     <string name="confirm">Confirm</string>
+    <string name="delete">Delete</string>
+    <string name="select">Select</string>
+    <string name="select_all">Select All</string>
+    <string name="select_items">Select items</string>
+    <string name="selected_items_count">Selected: %1$d</string>
+    <string name="previous">Previous</string>
+    <string name="finish">Finish</string>
+
+    <!-- Navigation -->
+    <string name="navigate_back">Navigate back</string>
     <string name="flashcards_screen_title">Flashcards</string>
     <string name="documents_screen_title">Documents</string>
     <string name="study_screen_title">Study</string>
     <string name="capture_screen_title">Document Scanner</string>
     <string name="image_preview_screen_title">Image Preview</string>
     <string name="ocr_screen_title">Text Recognition</string>
-    <string name="camera">Camera</string>
-    <string name="file">File</string>
-    <string name="take_photo">Take Photo</string>
-    <string name="camera_permission_denied">Camera permission denied</string>
-    <string name="captured_image_description">Captured Image</string>
-    <string name="title_label">"Title "</string>
+    <string name="create_screen_title">Create</string>
+    <string name="select_action">Select an Action</string>
+
+    <!-- Document Screen -->
+    <string name="add_document">Add Document</string>
     <string name="document_saved">The document has been saved</string>
-    <string name="navigate_back">Navigate back</string>
-    <string name="clear_search">Clear search</string>
-    <string name="search_documents">Search documents…</string>
-    <string name="search">Search</string>
+    <string name="title_label">"Title "</string>
+    <string name="delete_documents">Delete Documents</string>
+    <string name="delete_document_confirmation">Are you sure you want to delete this document?</string>
+    <string name="delete_multiple_documents_confirmation">Are you sure you want to delete %d documents?</string>
     <string name="toggle_view">Toggle View</string>
-    <string name="empty_title">No items yet</string>
-    <string name="empty_content">Press the + button to create a new item</string>
-    <string name="flashcards">%d flashcards</string>
+    <string name="document_options">Document Options</string>
+    <string name="view_document">View Document</string>
+    <string name="view_document_description">Read the full document content</string>
+    <string name="loading_document">Loading document details…</string>
+
+    <!-- OCR Screen -->
+    <string name="processing_image">Processing image, please wait…</string>
+    <string name="error_processing_image">Error processing image</string>
+    <string name="try_again">Try Again</string>
+    <string name="extracted_text_label">Extracted Text</string>
+    <string name="no_text_detected">No text detected</string>
+    <string name="try_another_image">Please try again with a different image containing text</string>
+    <string name="required_field">This field is required</string>
+    <string name="category_label">Category</string>
+    <string name="select_category">Select a category</string>
+    <string name="category_required">Please select a category</string>
+
+    <!-- Flashcards -->
+    <string name="flashcard_count">%1$d flashcards</string>
+    <string name="no_flashcards">No flashcards available yet</string>
     <string name="add_new_flashcard">Add new flashcard</string>
     <string name="shuffle_flashcards">Shuffle flashcards</string>
     <string name="tab_flashcards">Flashcards</string>
     <string name="tab_flashcards_list">Flashcards List</string>
     <string name="tap_to_flip">Tap card to flip</string>
     <string name="create_flashcards">Create Flashcards</string>
-    <string name="create_flashcard_confirmation">Do you want to create new flashcards?</string>
+    <string name="create_flashcard_confirmation">Do you want to creaflashcards</string>
+    <string name="view_flashcards">View Flashcards</string>
+    <string name="generate_flashcards_prompt">Generate AI-powered flashcards from this document content</string>
+    <string name="content_not_suitable_flashcards">Content is toote new flashcards?</string>
     <string name="flashcards_created_success">Flashcards created successfully</string>
     <string name="flashcards_creation_failed">Failed to create flashcards</string>
     <string name="creating_flashcards">Creating flashcards…</string>
+    <string name="no_documents_for_flashcards">No documents for  short to create flashcards</string>
+
+    <!-- Study Screen -->
     <string name="study_flashcards">Study Flashcards</string>
+    <string name="study_document_description">Practice with flashcards for this document</string>
     <string name="select_answer">Select an answer</string>
     <string name="check_answer">Check Answer</string>
     <string name="next_card">Next Card</string>
     <string name="previous_card">Previous Card</string>
-    <string name="previous">Previous</string>
-    <string name="finish">Finish</string>
     <string name="start_quiz">Start Quiz</string>
     <string name="study_completed">Study Completed!</string>
     <string name="correct_answers_count">Correct: %1$d/%2$d</string>
-    <string name="add_document">Add Document</string>
-    <string name="select">Select</string>
-    <string name="select_all">Select All</string>
-    <string name="select_items">Select items</string>
-    <string name="selected_items_count">Selected: %1$d</string>
-    <string name="search_results_for">Search results for \"%s\"</string>
-    <string name="no_search_results">No documents match your search</string>
-    <string name="try_different_search">Try using different keywords or check for typos</string>
-    <string name="no_documents_for_flashcards">No documents for flashcards</string>
-    <string name="delete_documents">Delete Documents</string>
-    <string name="delete_document_confirmation">Are you sure you want to delete this document?</string>
-    <string name="delete_multiple_documents_confirmation">Are you sure you want to delete %d documents?</string>
-    <string name="delete">Delete</string>
+
+    <!-- Profile and Statistics -->
     <string name="profile">Profile</string>
+    <string name="statistics_title">Statistics</string>
     <string name="study_statistics">Study Statistics</string>
     <string name="total_cards_studied">Cards Studied</string>
     <string name="correct_answers">Correct Answers</string>
@@ -67,4 +88,32 @@
     <string name="study_history">Study History</string>
     <string name="no_study_history">No study history yet</string>
     <string name="error_loading_profile">Unable to load user information</string>
+
+    <!-- Camera & Image -->
+    <string name="camera">Camera</string>
+    <string name="file">File</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="camera_permission_denied">Camera permission denied</string>
+    <string name="captured_image_description">Captured Image</string>
+
+    <!-- Search -->
+    <string name="search">Search</string>
+    <string name="search_documents">Search documents…</string>
+    <string name="clear_search">Clear search</string>
+    <string name="search_results_for">Search results for \"%s\"</string>
+    <string name="no_search_results">No documents match your search</string>
+    <string name="try_different_search">Try using different keywords or check for typos</string>
+
+    <!-- Empty States -->
+    <string name="empty_title">No items yet</string>
+    <string name="empty_content">Press the + button to create a new item</string>
+
+    <!-- Summary -->
+    <string name="summary">Summary</string>
+    <string name="no_summary">No summary available</string>
+    <string name="generate_summary">Generate Summary</string>
+    <string name="generate_summary_prompt">Generate an AI summary of this document to quickly understand its key points.</string>
+    <string name="content_too_short">Document content is too short. Please add more content (at least 50 words) to generate a summary.</string>
+    <string name="cannot_summarize">Cannot Generate Summary</string>
+    <string name="generating_summary">Generating summary…</string>
 </resources>

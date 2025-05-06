@@ -3,6 +3,7 @@ package com.app.fastlearn.di
 import android.content.Context
 import androidx.room.Room
 import com.app.fastlearn.data.local.AppDatabase
+import com.app.fastlearn.data.local.dao.CategoryDao
 import com.app.fastlearn.data.local.dao.DocumentDao
 import com.app.fastlearn.data.local.dao.FlashcardDao
 import com.app.fastlearn.data.local.dao.ProgressDao
@@ -21,6 +22,12 @@ object DatabaseModule {
     @Provides
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return AppDatabase.getDatabase(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCategoryDao(appDatabase: AppDatabase): CategoryDao {
+        return appDatabase.categoryDao()
     }
 
     @Singleton

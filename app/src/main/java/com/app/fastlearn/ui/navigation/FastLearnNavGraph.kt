@@ -1,12 +1,9 @@
 package com.app.fastlearn.ui.navigation
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -15,20 +12,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.app.fastlearn.ui.screens.capture.ImagePreviewScreen
-import com.app.fastlearn.ui.screens.documents.DocumentsScreen
-import com.app.fastlearn.ui.screens.flashcards.FlashcardsScreen
-import com.app.fastlearn.ui.screens.study.StudyScreen
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.app.fastlearn.ui.screens.create.CreateScreen
 import com.app.fastlearn.ui.screens.documents.DocumentDetailScreen
-import com.app.fastlearn.ui.screens.documents.DocumentsViewModel
-import com.app.fastlearn.ui.screens.documents.OCRScreen
+import com.app.fastlearn.ui.screens.documents.DocumentsScreen
+import com.app.fastlearn.ui.screens.ocr.OCRScreen
+import com.app.fastlearn.ui.screens.flashcards.FlashcardsScreen
+import com.app.fastlearn.ui.screens.option.OptionScreen
 import com.app.fastlearn.ui.screens.profile.ProfileScreen
-import com.app.fastlearn.ui.screens.study.StudyListScreen
-import kotlin.toString
+import com.app.fastlearn.ui.screens.statistics.StatisticsScreen
+import com.app.fastlearn.ui.screens.study.StudyScreen
 
 @Composable
 fun FastLearnNavGraph(
@@ -40,8 +32,8 @@ fun FastLearnNavGraph(
         NavigationActions(navController)
     }
 ) {
-    val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = currentNavBackStackEntry?.destination?.route ?: startDestination
+//    val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
+//    val currentRoute = currentNavBackStackEntry?.destination?.route ?: startDestination
 
     NavHost(
         navController = navController,
@@ -51,64 +43,86 @@ fun FastLearnNavGraph(
         composable(Destinations.DOCUMENTS_ROUTE) {
             DocumentsScreen(
                 modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
-                onImagePreviewClick = { imageUri ->
-                    navActions.navigateToImagePreview(imageUri)
-                },
-                onImportFile = { /*Todo: Xử lý nhập file văn bản*/ },
                 onProfileClick = { navActions.navigateToProfile() },
                 onDocumentClick = { documentId ->
-                    navActions.navigateToDocumentDetail(documentId)
+                    navActions.navigateToOption(documentId)
                 },
             )
         }
 
-
-        composable(Destinations.FLASHCARDS_ROUTE) {
-            FlashcardsScreen(
+        composable(Destinations.CREATE_ROUTE) {
+            CreateScreen(
                 modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
-            )
-        }
-
-        composable(Destinations.STUDY_LIST_ROUTE) {
-            StudyListScreen(
-                modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
-                onDocumentSelected = { documentId ->
-                    navActions.navigateToStudy(documentId)
+                onOCRClick = { imageUri ->
+                    navActions.navigateToOCR(imageUri)
                 },
+                onFileClick = {
+                    // Handle file import
+                }
             )
         }
+
+        composable(Destinations.STATISTICS) {
+            StatisticsScreen(
+                modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
+            )
+        }
+
 
         composable(
-            Destinations.IMAGE_PREVIEW_ROUTE,
-            arguments = listOf(
-                navArgument(DestinationsArgs.IMAGE_URI) { type = NavType.StringType }
-            )
+            route = Destinations.OPTION_ROUTE,
+            arguments = listOf(navArgument(DestinationsArgs.DOCUMENT_ID) {
+                type = NavType.StringType
+            })
         ) { entry ->
-            ImagePreviewScreen(
-                modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
-                imageUri = entry.arguments?.getString(DestinationsArgs.IMAGE_URI)!!,
-                onConfirmNavigate = { recognizedText ->
-                    navActions.navigateToOCR(recognizedText)
+            OptionScreen(
+                documentId = entry.arguments?.getString(DestinationsArgs.DOCUMENT_ID)!!,
+                modifier = Modifier.statusBarsPadding(),
+                onNavigateBack = { navActions.navigateBack() },
+                onViewDocument = { docId ->
+                    navActions.navigateToDocumentDetail(docId)
                 },
-                onDiscardNavigate = { navActions.navigateBack() }
+                onViewFlashcards = { docId ->
+                    navActions.navigateToFlashcards(docId)
+                    // Need to add logic to load specific document flashcards
+                },
+                onStudy = { docId ->
+                    navActions.navigateToStudy(docId)
+                }
             )
         }
+
+
+        composable(
+            route = Destinations.FLASHCARDS_ROUTE,
+            arguments = listOf(navArgument(DestinationsArgs.DOCUMENT_ID) {
+                type = NavType.StringType
+            })
+        ) { entry ->
+            FlashcardsScreen(
+                modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
+                onNavigateBack = { navActions.navigateBack() },
+            )
+        }
+
+
 
         composable(
             route = Destinations.OCR_ROUTE,
             arguments = listOf(
-                navArgument(DestinationsArgs.RECOGNIZED_TEXT_ID) { type = NavType.StringType }
+                navArgument(DestinationsArgs.IMAGE_URI) { type = NavType.StringType }
             )
         ) { entry ->
             OCRScreen(
                 modifier = Modifier.padding(bottom = bottomInnerPadding.calculateBottomPadding()),
-                onConfirmNavigate = { navActions.navigateComfirmFromOCR() },
-                onDiscardNavigate = { TODO("Gọi Intent mở Camera") },
+                imageUri = entry.arguments?.getString(DestinationsArgs.IMAGE_URI),
+                onConfirmNavigate = { navActions.navigateConfirmFromOCR() },
+                onDiscardNavigate = { navActions.navigateBack() },
             )
         }
 
         composable(
-            route = "${Destinations.DOCUMENT_DETAIL_ROUTE}/{documentId}",
+            route = Destinations.DOCUMENT_DETAIL_ROUTE,
             arguments = listOf(navArgument(DestinationsArgs.DOCUMENT_ID) {
                 type = NavType.StringType
             })
@@ -116,12 +130,12 @@ fun FastLearnNavGraph(
             DocumentDetailScreen(
                 documentId = entry.arguments?.getString(DestinationsArgs.DOCUMENT_ID)!!,
                 modifier = Modifier.statusBarsPadding(),
-                onNavigateBack = { navActions.navigateToDocuments() }
+                onNavigateBack = { navActions.navigateBack() }
             )
         }
 
         composable(
-            route = "${Destinations.STUDY_ROUTE}/{documentId}",
+            route = Destinations.STUDY_ROUTE,
             arguments = listOf(navArgument(DestinationsArgs.DOCUMENT_ID) {
                 type = NavType.StringType
             })
@@ -132,7 +146,7 @@ fun FastLearnNavGraph(
                 onSendProgress = { documentId ->
                     //Todo: Xử lý gửi tiến trình sang profile
                 },
-                onNavigateBack = { navActions.navigateToStudyList() },
+                onNavigateBack = { navActions.navigateBack() },
             )
         }
 

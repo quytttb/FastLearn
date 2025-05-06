@@ -1,11 +1,7 @@
 package com.app.fastlearn.ui.screens.documents
 
-import ExtendedFAB
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,7 +39,6 @@ import com.app.fastlearn.ui.components.EmptyScreen
 import com.app.fastlearn.ui.components.SearchTopBar
 import com.app.fastlearn.ui.components.SelectTopBar
 import com.app.fastlearn.ui.screens.flashcards.FlashcardsViewModel
-import com.app.fastlearn.util.CameraHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SuspiciousIndentation")
@@ -53,33 +47,9 @@ fun DocumentsScreen(
     modifier: Modifier = Modifier,
     documentsViewModel: DocumentsViewModel = hiltViewModel(),
     flashcardsViewModel: FlashcardsViewModel = hiltViewModel(),
-    onImagePreviewClick: (String) -> Unit,
-    onImportFile: () -> Unit,
     onProfileClick: () -> Unit,
     onDocumentClick: (String) -> Unit
 ) {
-    // Lấy context từ LocalContext
-    val context = LocalContext.current
-
-    // Khởi tạo CameraHelper
-    val cameraHelper = remember { CameraHelper(context) }
-
-    // Tạo launcher trong Composable
-    val takePictureLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { success ->
-            if (success) {
-                // Lấy URI ảnh từ CameraHelper
-                cameraHelper.getCurrentImageUri()?.let { uri ->
-                    // Xử lý ảnh đã chụp, ví dụ: tạo document mới từ ảnh
-                    Log.d("DocumentsScreen", "Image captured: $uri")
-                    // Chỗ này bạn có thể thêm logic xử lý ảnh như tạo document mới
-                    // rồi chuyển đến màn hình xem tài liệu
-                    onImagePreviewClick(uri.toString())
-                }
-            }
-        }
-    )
 
     // Lấy trạng thái của ViewModel
     val uiState by documentsViewModel.uiState.collectAsState()
@@ -98,13 +68,13 @@ fun DocumentsScreen(
         }
     }
 
-    // Track when a search has been submitted
+    // Kiểm trạng thái tìm kiếm
     var hasSearched by remember { mutableStateOf(false) }
 
-    // Track whether we're showing search results
+    // Kiểm tra xem có đang hiển thị kết quả tìm kiếm hay không
     val isShowingSearchResults = (isSearchActive || hasSearched) && uiState.searchQuery.isNotEmpty()
 
-    // Documents to display (search results or all documents)
+    // Hiển thị các tài liệu dựa trên trạng thái tìm kiếm
     val documentsToDisplay =
         if (uiState.searchQuery.isBlank()) uiState.allDocuments else uiState.searchResults
 
@@ -154,7 +124,7 @@ fun DocumentsScreen(
                 )
             }
 
-            // Loading indicator
+            //
             if (uiState.isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -163,7 +133,7 @@ fun DocumentsScreen(
                     CircularProgressIndicator()
                 }
             } else {
-                // Show search results label when searching
+                // Hiển thị nhãn kết quả khi đang tìm kiếm
                 if (isShowingSearchResults) {
                     Text(
                         text = stringResource(
@@ -175,7 +145,7 @@ fun DocumentsScreen(
                     )
                 }
 
-                // Error message if needed
+                // Hiển thị thông báo lỗi nếu có
                 if (uiState.isError) {
                     Text(
                         text = uiState.errorMessage,
@@ -185,15 +155,10 @@ fun DocumentsScreen(
                     )
                 }
 
-                // Empty state handling
+                // Xử lý trường hợp không có tài liệu nào
                 if (documentsToDisplay.isEmpty()) {
                     if (isShowingSearchResults) {
-                        // No search results - use the dedicated component
-                        // Log the search query for debugging
-                        Log.d(
-                            "DocumentsScreen",
-                            "No search results for query: ${uiState.searchQuery}"
-                        )
+                        // Khi không có kết quả tìm kiếm
                         EmptyScreen(
                             modifier.fillMaxSize(),
                             vectorImage = Icons.Default.Search,
@@ -201,9 +166,7 @@ fun DocumentsScreen(
                             message = stringResource(id = R.string.try_different_search)
                         )
                     } else {
-                        // No documents - use the standard EmptyScreen
-                        // Log the empty state for debugging
-                        Log.d("DocumentsScreen", "No documents available")
+                        // Khi không có tài liệu nào
                         EmptyScreen(
                             modifier.fillMaxSize(),
                             vectorImage = Icons.AutoMirrored.Filled.Note,
@@ -213,7 +176,7 @@ fun DocumentsScreen(
                         )
                     }
                 } else {
-                    // Document list/grid display
+                    // Hiển thị danh sách tài liệu theo kiểu lưới hoặc danh sách
                     if (isGridView) {
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
@@ -274,16 +237,6 @@ fun DocumentsScreen(
                     }
                 }
             }
-        }
-
-        // FAB thêm tài liệu, chụp ảnh, nhập file
-        if (!uiState.isSelectionMode) {
-            ExtendedFAB(
-                onCameraClick = {
-                    cameraHelper.openCamera(takePictureLauncher)
-                },
-                onFileClick = onImportFile,
-            )
         }
     }
 }

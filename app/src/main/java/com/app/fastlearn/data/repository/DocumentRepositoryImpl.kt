@@ -49,4 +49,10 @@ class DocumentRepositoryImpl @Inject constructor(
             entities.map { dataMapper.mapDocumentEntityToDomain(it) }
         }
     }
+
+    override fun getDocumentsByCategory(categoryId: String): Flow<List<Document>> {
+        return documentDao.getDocumentsByCategory(categoryId).map { entities ->
+            entities.map { dataMapper.mapDocumentEntityToDomain(it) }
+        }
+    }
 }

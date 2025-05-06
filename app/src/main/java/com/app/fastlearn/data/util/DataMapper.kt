@@ -1,8 +1,10 @@
 package com.app.fastlearn.data.util
 
+import com.app.fastlearn.data.local.entity.CategoryEntity
 import com.app.fastlearn.data.local.entity.DocumentEntity
 import com.app.fastlearn.data.local.entity.FlashcardEntity
 import com.app.fastlearn.data.local.entity.ProgressEntity
+import com.app.fastlearn.domain.model.Category
 import com.app.fastlearn.domain.model.Document
 import com.app.fastlearn.domain.model.Flashcard
 import com.app.fastlearn.domain.model.Progress
@@ -17,7 +19,7 @@ class DataMapper @Inject constructor() {
             title = entity.title,
             content = entity.content,
             filePath = entity.filePath,
-            category = entity.category,
+            categoryId = entity.categoryId,
             createdDate = entity.createdDate
         )
     }
@@ -28,8 +30,25 @@ class DataMapper @Inject constructor() {
             title = domain.title,
             content = domain.content,
             filePath = domain.filePath,
-            category = domain.category,
+            categoryId = domain.categoryId,
             createdDate = domain.createdDate
+        )
+    }
+
+    // Category mappings
+    fun mapCategoryEntityToDomain(entity: CategoryEntity): Category {
+        return Category(
+            categoryId = entity.categoryId,
+            name = entity.name,
+            description = entity.description
+        )
+    }
+
+    fun mapCategoryDomainToEntity(domain: Category): CategoryEntity {
+        return CategoryEntity(
+            categoryId = domain.categoryId,
+            name = domain.name,
+            description = domain.description
         )
     }
 

@@ -10,4 +10,5 @@ interface DocumentRepository {
     fun getDocumentById(id: String): Flow<Document?>
     suspend fun updateDocument(document: Document)
     fun searchDocuments(query: String): Flow<List<Document>>
+    fun getDocumentsByCategory(categoryId: String): Flow<List<Document>>
 }

@@ -43,8 +43,8 @@ fun FastLearnApp(
     LaunchedEffect(currentRoute) {
         bottomBarState.value = when (currentRoute) {
             Destinations.DOCUMENTS_ROUTE,
-            Destinations.FLASHCARDS_ROUTE,
-            Destinations.STUDY_LIST_ROUTE -> true
+            Destinations.CREATE_ROUTE,
+            Destinations.STATISTICS -> true
             else -> false
         }
 

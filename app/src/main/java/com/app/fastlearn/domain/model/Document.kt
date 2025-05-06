@@ -7,6 +7,6 @@ data class Document(
     val title: String,
     val content: String,
     val filePath: String,
-    val category: String,
+    val categoryId: String?,
     val createdDate: LocalDateTime
 )
